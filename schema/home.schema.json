@@ -1,0 +1,570 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackstart.ericpullen.com/schema/home.schema.json",
+  "title": "Blackstart home data",
+  "description": "Shape reference for data/*.json. This documents the schema; scripts/validate.js is what actually enforces it (including the cross-field rules a JSON Schema cannot express, like poles matching slot count or estimatedWattsTotal matching its circuits).",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "home",
+    "backupSources",
+    "panels",
+    "devices",
+    "scenarios",
+    "walkthroughSteps"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2,
+      "description": "Bump only on a breaking change, and update Model.SCHEMA_VERSION to match."
+    },
+    "home": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "serviceAmps": {
+          "type": "number"
+        }
+      }
+    },
+    "backupSources": {
+      "type": "object",
+      "description": "Keyed by an id that panels reference via backupSource.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "name",
+          "maxOutputWatts"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "capacityKwh": {
+            "type": "number",
+            "description": "Stored energy. Governs how long."
+          },
+          "maxOutputWatts": {
+            "type": "number",
+            "description": "Instantaneous output ceiling. Governs how much at once. This is what the load check compares against."
+          },
+          "location": {
+            "type": "string"
+          },
+          "connectionType": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "equipment": {
+      "type": "object",
+      "description": "Reference material about the hardware platform. Display-only; nothing computes from it.",
+      "properties": {
+        "breakerPlatform": {
+          "type": "object"
+        }
+      }
+    },
+    "panels": {
+      "type": "object",
+      "description": "Keyed by panel id (\"A\", \"B\"). Device ids are prefixed with this key.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "name",
+          "slots"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "slots": {
+            "type": "integer",
+            "description": "Total positions. Odd = left column, even = right column."
+          },
+          "backupSource": {
+            "type": "string",
+            "description": "Key into backupSources."
+          },
+          "location": {
+            "type": "string"
+          },
+          "mainBreaker": {
+            "type": "object"
+          },
+          "generatorInlet": {
+            "type": "object",
+            "description": "The backup feed. deviceId points at the device whose role is generatorInlet.",
+            "properties": {
+              "deviceId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "breakerSlots": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "interlockType": {
+                "type": "string"
+              },
+              "receptacle": {
+                "type": "object"
+              },
+              "confidence": {
+                "$ref": "#/definitions/confidence"
+              }
+            }
+          },
+          "emptySlots": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Slots VERIFIED to have no breaker. Declaring them is what lets the app tell 'empty' apart from 'nobody looked'. Any slot neither occupied nor listed here renders as 'Not surveyed'. A panel is fully surveyed when occupied + emptySlots = slots; that is derived, never stored."
+          }
+        }
+      }
+    },
+    "devices": {
+      "type": "array",
+      "description": "ONE ENTRY PER PHYSICAL BREAKER. A 2-pole breaker is one device with two slots, because it has one handle and trips as a unit.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "panel",
+          "slots",
+          "poles",
+          "amps",
+          "role",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Convention: <panel>-<slots joined by ->, e.g. A-9 or A-13-15. Stable; referenced by openQuestions and the UI."
+          },
+          "panel": {
+            "type": "string"
+          },
+          "slots": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer"
+            },
+            "description": "A 2-pole device occupies two same-parity slots two apart (both in one column), e.g. [13,15]."
+          },
+          "poles": {
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ],
+            "description": "Must equal slots.length."
+          },
+          "amps": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The number on the handle. null for an installed device whose rating cannot be read yet \u2014 the key must still be present so the omission is deliberate. A null-amps device is absent from all load math."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "branch",
+              "generatorInlet"
+            ],
+            "description": "Only 'branch' is a load. 'generatorInlet' is the backup feed and is excluded from search and all load math."
+          },
+          "label": {
+            "type": "string",
+            "description": "What a non-technical person should read. Keep it short enough for a breaker tile."
+          },
+          "shortLabel": {
+            "type": "string",
+            "description": "Compact form for the printed panel-door insert, where a cell is about 32 characters wide. Falls back to `label`. scripts/make-insert.js reports any label that overflows rather than silently clipping it."
+          },
+          "labelSource": {
+            "type": "string",
+            "description": "Provenance. 'placeholder' or an 'auto-generated...' value makes validate.js warn until a human rewrites it."
+          },
+          "circuitType": {
+            "type": "string"
+          },
+          "physicalMarking": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Anything written on or stuck to the breaker, e.g. 'orange tape'. Searchable."
+          },
+          "priority": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "critical",
+              null
+            ]
+          },
+          "shedIn": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scenario keys in which this breaker gets turned off. THE single source of truth for shed lists \u2014 scenarios derive theirs from this."
+          },
+          "hardware": {
+            "type": "object",
+            "properties": {
+              "manufacturer": {
+                "type": "string"
+              },
+              "catalogNumber": {
+                "type": "string"
+              },
+              "legacyCatalogNumber": {
+                "type": "string"
+              },
+              "breakerType": {
+                "type": "string"
+              },
+              "voltage": {
+                "type": "string"
+              },
+              "interruptRating": {
+                "type": "string"
+              },
+              "hacr": {
+                "type": "boolean"
+              },
+              "issueNo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "smartReplacement": {
+                "type": "string"
+              },
+              "photoVerified": {
+                "type": "boolean",
+                "description": "False makes the UI badge this breaker as unverified."
+              },
+              "confidence": {
+                "$ref": "#/definitions/confidence"
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          },
+          "circuits": {
+            "type": "array",
+            "description": "What this breaker actually feeds. Empty array = breaker present, loads unknown (rendered differently from an empty slot).",
+            "items": {
+              "type": "object",
+              "required": [
+                "room",
+                "endpoint",
+                "estimatedWatts"
+              ],
+              "properties": {
+                "room": {
+                  "type": "string",
+                  "description": "Canonical name. roomAliases handles display."
+                },
+                "endpoint": {
+                  "type": "string"
+                },
+                "estimatedWatts": {
+                  "type": "number"
+                },
+                "fedFromSlot": {
+                  "type": [
+                    "integer",
+                    "array"
+                  ],
+                  "items": {
+                    "type": "integer"
+                  },
+                  "description": "Which of the device's own slots feeds this. A number for one leg of an MWBC, an array for a true 240V load."
+                },
+                "voltage": {
+                  "type": "string"
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": [
+                    "critical"
+                  ]
+                },
+                "notes": {
+                  "type": "string",
+                  "description": "A STRING here (device-level notes is an array)."
+                },
+                "verified": {
+                  "type": "boolean",
+                  "description": "Whether this circuit was actually confirmed at the panel. false makes the app badge it 'Unconfirmed' and show it as a guess. Absent means provenance was never recorded, which is different from recorded-and-failed."
+                },
+                "verificationMethod": {
+                  "type": "string",
+                  "description": "How it was confirmed, e.g. 'breaker walk-through'."
+                }
+              }
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "An ARRAY here (circuit-level notes is a string)."
+          },
+          "estimatedWattsTotal": {
+            "type": "number",
+            "description": "Must equal the sum of its circuits' estimatedWatts. validate.js enforces this."
+          }
+        }
+      }
+    },
+    "scenarios": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "name",
+          "panelsAvailable"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "panelsAvailable": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "openQuestions": {
+      "type": "array",
+      "description": "Known unknowns and contradictions. deviceIds link a question to breakers so the UI can badge disputed data instead of presenting it as settled.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "severity",
+          "resolution"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "panel": {
+            "type": "string"
+          },
+          "deviceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recorded": {
+            "type": "string"
+          },
+          "observed": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              "info"
+            ]
+          },
+          "resolution": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "safetyWarnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "message",
+          "severity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "warning",
+              "info"
+            ]
+          },
+          "showInWalkthrough": {
+            "type": "boolean"
+          },
+          "panels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Panels this warning applies to. OMIT for warnings that apply everywhere. Scoping matters on the printed per-panel inserts: without it the Panel B card carried the Anker trickle-charge instruction, which is a Panel A device."
+          }
+        }
+      }
+    },
+    "walkthroughSteps": {
+      "type": "object",
+      "description": "Keyed by procedure: panelA, panelB, rechargeAnkerFromTruck.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "title",
+            "instruction"
+          ],
+          "properties": {
+            "step": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "string"
+            },
+            "instruction": {
+              "type": "string"
+            },
+            "warning": {
+              "type": "string"
+            },
+            "image": {
+              "type": "string"
+            },
+            "icon": {
+              "type": "string",
+              "description": "Name from the icon map in src/app.js. Unknown names fall back to the step number."
+            },
+            "breakersToTurnOff": {
+              "oneOf": [
+                {
+                  "const": "scenario-dependent"
+                },
+                {
+                  "type": "array"
+                }
+              ],
+              "description": "'scenario-dependent' resolves from devices[].shedIn for this step's panel."
+            }
+          }
+        }
+      }
+    },
+    "roomAliases": {
+      "type": "object",
+      "description": "Canonical room name -> display name.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "lastUpdated": {
+          "type": "string",
+          "description": "Shown in the app so a reader knows how fresh the offline copy is."
+        },
+        "notes": {
+          "type": "string"
+        },
+        "changelog": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "unassignedEndpoints": {
+      "type": "array",
+      "description": "Endpoints known to exist whose breaker has not been identified. These ARE shown in search, as rows reading 'Breaker unknown' \u2014 omitting them would imply the outlet does not exist. Once traced, move the entry into that device's circuits and delete it here.",
+      "items": {
+        "type": "object",
+        "required": [
+          "room",
+          "endpoint"
+        ],
+        "properties": {
+          "room": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "unverified"
+      ]
+    }
+  }
+}

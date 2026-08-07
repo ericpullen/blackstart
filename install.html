@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Install Blackstart</title>
+  <meta name="theme-color" content="#f59e0b">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <script>
+    (function () {
+      var t = localStorage.getItem('blackstart-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --card: #1a1a1f;
+      --card-2: #131316;
+      --border: #2a2a32;
+      --text: #f0f0f2;
+      --text-2: #8a8a95;
+      --text-3: #5a5a65;
+      --amber: #f59e0b;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+    [data-theme="light"] {
+      --bg: #f7f7f8;
+      --card: #ffffff;
+      --card-2: #f0f0f2;
+      --border: #dcdce2;
+      --text: #18181b;
+      --text-2: #55555f;
+      --text-3: #85858f;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      padding: calc(24px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom));
+      max-width: 620px;
+      margin: 0 auto;
+    }
+    a { color: var(--amber); }
+    .back {
+      display: inline-block;
+      font-size: 14px;
+      text-decoration: none;
+      margin-bottom: 24px;
+    }
+    h1 { font-size: 24px; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .lede { color: var(--text-2); font-size: 15px; margin-bottom: 28px; }
+    h2 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-3);
+      margin: 32px 0 12px;
+    }
+    ol { list-style: none; counter-reset: s; }
+    li {
+      counter-increment: s;
+      position: relative;
+      padding: 14px 16px 14px 52px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+    li::before {
+      content: counter(s);
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--amber);
+      color: #0a0a0b;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 24px;
+    }
+    li strong { font-weight: 600; }
+    .note {
+      background: var(--card-2);
+      border-left: 3px solid var(--amber);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 14px;
+      color: var(--text-2);
+      margin: 20px 0;
+    }
+    .note.good { border-left-color: var(--green); }
+    .note strong { color: var(--text); }
+    .why { font-size: 14px; color: var(--text-2); }
+    .why p { margin-bottom: 12px; }
+    footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-3);
+    }
+    kbd {
+      font-family: inherit;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 13px;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">&larr; Back to Blackstart</a>
+
+  <h1>Install on your phone</h1>
+  <p class="lede">
+    Installing puts Blackstart on your home screen and keeps a full copy on the device.
+    After that it opens and works with no power, no Wi-Fi and no cell signal.
+  </p>
+
+  <h2>iPhone / iPad — Safari</h2>
+  <ol>
+    <li>Open this page in <strong>Safari</strong>. Other browsers on iOS cannot install it properly.</li>
+    <li>Tap the <strong>Share</strong> button — the square with an arrow pointing up.</li>
+    <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+    <li>Tap <strong>Add</strong>. A Blackstart icon appears on your home screen.</li>
+    <li>Open it from that icon <strong>once, while you still have signal</strong>, so it can finish caching everything.</li>
+  </ol>
+
+  <h2>Android — Chrome</h2>
+  <ol>
+    <li>Open this page in <strong>Chrome</strong>.</li>
+    <li>Tap the <strong>&#8942;</strong> menu.</li>
+    <li>Tap <strong>Add to Home screen</strong> (or <strong>Install app</strong>).</li>
+    <li>Open it once from the new icon while you still have signal.</li>
+  </ol>
+
+  <div class="note good">
+    <strong>Installing is not just a shortcut.</strong> Safari clears cached data for
+    ordinary bookmarked sites after about a week of no visits. Web apps added to the
+    home screen are exempt from that. So installing is what actually makes the offline
+    copy stick around until you need it.
+  </div>
+
+  <h2>Why this matters</h2>
+  <div class="why">
+    <p>
+      An outage usually takes your router down with it, and regional outages tend to
+      congest the cell network at the same moment everyone reaches for their phone.
+      A reference you have to download during the emergency is not a reference.
+    </p>
+    <p>
+      Blackstart ships everything it needs — the panel schedule, the step photos, the
+      walkthrough — into the device up front. There are no fonts, scripts or images
+      loaded from anywhere else.
+    </p>
+  </div>
+
+  <div class="note">
+    <strong>Keep a paper copy too.</strong> A phone with a dead battery is no better than
+    a website you cannot reach. Print the panel schedule and tape it inside the panel door.
+  </div>
+
+  <h2>Updating</h2>
+  <div class="why">
+    <p>
+      When the data changes, open the app while you have a connection and it will pull the
+      new copy. If it looks stale, close it fully and reopen it — the updated version is
+      applied on the next launch.
+    </p>
+  </div>
+
+  <footer>
+    Blackstart is open source and MIT licensed.
+    Fork it at <a href="https://github.com/ericpullen/blackstart">github.com/ericpullen/blackstart</a>
+    and point <code>data/</code> at your own panel.
+  </footer>
+</body>
+</html>

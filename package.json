@@ -1,0 +1,20 @@
+{
+  "name": "blackstart",
+  "version": "1.0.0",
+  "description": "Blackstart \u2014 Home Outage Guide. An offline-first reference for bringing a house up on backup power.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ericpullen/blackstart.git"
+  },
+  "scripts": {
+    "validate": "node scripts/validate.js",
+    "insert": "node scripts/make-insert.js",
+    "test": "node scripts/validate.js && node test/e2e.js && node test/insert.js",
+    "start": "python3 -m http.server 8000",
+    "icons": "rsvg-convert -w 192 -h 192 assets/icon.svg -o assets/icon-192.png && rsvg-convert -w 512 -h 512 assets/icon.svg -o assets/icon-512.png && rsvg-convert -w 180 -h 180 assets/icon.svg -o assets/apple-touch-icon.png"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}

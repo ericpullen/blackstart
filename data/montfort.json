@@ -1,0 +1,2327 @@
+{
+  "schemaVersion": 2,
+  "home": {
+    "name": "Montfort Residence",
+    "serviceAmps": 400
+  },
+  "backupSources": {
+    "anker": {
+      "name": "Anker F3800+",
+      "shortName": "Anker",
+      "capacityKwh": 3.8,
+      "maxOutputWatts": 3800,
+      "location": "Panel A",
+      "connectionType": "Interlock breaker"
+    },
+    "lightning": {
+      "name": "Ford F-150 Lightning",
+      "shortName": "Lightning",
+      "capacityKwh": 131,
+      "maxOutputWatts": 9600,
+      "location": "Panel B",
+      "connectionType": "30A outdoor receptacle"
+    }
+  },
+  "equipment": {
+    "breakerPlatform": {
+      "manufacturer": "Leviton",
+      "family": "Leviton Load Center",
+      "breakerStyle": "plug-on",
+      "notes": "Leviton load centers use proprietary plug-on LB-series breakers. Hot and neutral conductors land on panel lugs, not on the breaker itself. Not interchangeable with Square D / Eaton / Siemens breakers.",
+      "catalogNumbering": {
+        "pattern": "LB + poles(1|2) + amps(2 digits) + suffix",
+        "standardThermalMagnetic": {
+          "15A-1P": "LB115-T",
+          "20A-1P": "LB120-T",
+          "25A-1P": "LB125-T",
+          "30A-1P": "LB130-T",
+          "15A-2P": "LB215-T",
+          "20A-2P": "LB220-T",
+          "25A-2P": "LB225-T",
+          "30A-2P": "LB230-T",
+          "40A-2P": "LB240-T",
+          "50A-2P": "LB250-T",
+          "60A-2P": "LB260-T"
+        },
+        "suffixKey": {
+          "-T": "current-generation standard thermal-magnetic (supersedes the un-suffixed LBxxx hydraulic-magnetic parts)",
+          "-AFT": "AFCI",
+          "-GFT / -G": "GFCI, 5 mA personnel protection",
+          "-DFT": "AFCI/GFCI dual function",
+          "-EPT / -EP": "GFPE, 30 mA equipment protection",
+          "-S / -ST": "Smart (1st gen / 2nd gen) metering + remote trip"
+        },
+        "smartUpgradePath": {
+          "15A-1P": "LB115-ST",
+          "20A-1P": "LB120-ST",
+          "15A-2P": "LB215-ST",
+          "20A-2P": "LB220-ST",
+          "30A-2P": "LB230-ST",
+          "notes": "2nd-gen smart breakers are the drop-in metering replacements for the standard -T parts in these same slots."
+        }
+      }
+    }
+  },
+  "panels": {
+    "A": {
+      "name": "Panel A",
+      "fullName": "Panel A (Primary / Anker Backup)",
+      "slots": 30,
+      "backupSource": "anker",
+      "location": "Garage",
+      "notes": "Primary backup panel - can be powered by Anker F3800+",
+      "mainBreaker": {
+        "manufacturer": "Leviton",
+        "amps": 200,
+        "poles": 2,
+        "catalogNumber": "LM200-T",
+        "catalogNumberAlternate": "LM200",
+        "voltage": "120/240 VAC",
+        "interruptRating": "22kA",
+        "confidence": "medium",
+        "notes": "Face is marked only 'LEVITON 200'. LM200-T is thermal-magnetic; LM200 is the older hydraulic-magnetic part. All branch breakers in this panel are thermal-magnetic '-T' style, so LM200-T is the likely part. Confirm from the side label or panel schedule."
+      },
+      "generatorInlet": {
+        "deviceId": "A-2-4",
+        "breakerSlots": [
+          2,
+          4
+        ],
+        "breakerAmps": 30,
+        "breakerPoles": 2,
+        "breakerCatalogNumber": "LB230-T",
+        "interlockType": "mechanical sliding-plate interlock over the top two right-column positions",
+        "interlockCandidates": [
+          "Leviton LITLK Transfer Interlock Kit",
+          "GenSafety LEV-200 (aftermarket)"
+        ],
+        "receptacle": {
+          "location": "Wall, immediately left of Panel A (garage, interior)",
+          "configuration": "NEMA L14-30 (30A, 125/250V, 3-pole 4-wire twist-lock)",
+          "gender": "female (receptacle, not a flanged inlet)",
+          "enclosure": "surface-mount metal single-gang box",
+          "confidence": "medium",
+          "notes": "VERIFY. The photo shows a female twist-lock face, which would require a male-to-male cord from the Anker's L14-30 output. Confirm whether this is actually a flanged power inlet before relying on this description."
+        },
+        "confidence": "high",
+        "notes": "Slots 2 and 4 are NOT a branch circuit - they are the backup feed. The interlock plate physically prevents the main and this breaker from both being ON."
+      },
+      "emptySlots": []
+    },
+    "B": {
+      "name": "Panel B",
+      "fullName": "Panel B (Secondary / Lightning Backup)",
+      "slots": 30,
+      "backupSource": "lightning",
+      "location": "Garage",
+      "notes": "Secondary panel - can be powered by F-150 Lightning via outdoor 30A receptacle. 14 of 30 slots are empty - substantial room for smart-breaker or solar expansion.",
+      "mainBreaker": {
+        "manufacturer": "Leviton",
+        "amps": 200,
+        "poles": 2,
+        "catalogNumber": "LM200-T",
+        "catalogNumberAlternate": "LM200",
+        "voltage": "120/240 VAC",
+        "interruptRating": "22kA",
+        "confidence": "medium",
+        "notes": "Face is marked only 'LEVITON 200', same as Panel A. Confirm LM200-T vs LM200."
+      },
+      "generatorInlet": {
+        "deviceId": "B-2-4",
+        "breakerSlots": [
+          2,
+          4
+        ],
+        "breakerAmps": 30,
+        "breakerPoles": 2,
+        "breakerCatalogNumber": "LB230-T",
+        "interlockType": "mechanical sliding-plate interlock over the top two right-column positions",
+        "receptacle": {
+          "location": "Outdoors",
+          "configuration": "30A (exact NEMA configuration not yet confirmed)",
+          "confidence": "unverified",
+          "notes": "Not yet photographed. Confirm the configuration before the first real transfer."
+        },
+        "confidence": "high",
+        "notes": "Slots 2 and 4 are the backup feed, not a branch circuit. Confirmed from photo and the directory card ('GEN INPUT')."
+      },
+      "emptySlots": [
+        5,
+        7,
+        15,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        27,
+        29
+      ]
+    }
+  },
+  "devices": [
+    {
+      "id": "A-1-3",
+      "panel": "A",
+      "slots": [
+        1,
+        3
+      ],
+      "poles": 2,
+      "amps": 30,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB230-T",
+        "legacyCatalogNumber": "LB230",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0107964",
+        "smartReplacement": "LB230-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Dryer outlet",
+      "labelSource": "single circuit",
+      "circuitType": "240V appliance",
+      "physicalMarking": "orange tape",
+      "priority": null,
+      "shedIn": [
+        "truckHome",
+        "truckAway"
+      ],
+      "circuits": [
+        {
+          "room": "Mud Room",
+          "endpoint": "Dryer outlet",
+          "estimatedWatts": 5000,
+          "fedFromSlot": [
+            1,
+            3
+          ],
+          "voltage": "240V",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 5000
+    },
+    {
+      "id": "A-5-7",
+      "panel": "A",
+      "slots": [
+        5,
+        7
+      ],
+      "poles": 2,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB220-T",
+        "legacyCatalogNumber": "LB220",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0107844",
+        "smartReplacement": "LB220-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Basement \u2014 fridge, bath, ejector pump",
+      "shortLabel": "Basement: fridge, bath, pump",
+      "labelSource": "authored",
+      "circuitType": "probable MWBC (two 120V legs, shared neutral)",
+      "physicalMarking": null,
+      "priority": "critical",
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Finished Basement",
+          "endpoint": "Refrigerator",
+          "estimatedWatts": 150,
+          "fedFromSlot": 7,
+          "priority": "critical",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Finished Basement",
+          "endpoint": "Kitchenette counter electrical plug",
+          "estimatedWatts": 200,
+          "fedFromSlot": 7,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Basement Bathroom",
+          "endpoint": "Floor electrical plug",
+          "estimatedWatts": 50,
+          "fedFromSlot": 7,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Basement Bathroom",
+          "endpoint": "Vanity Plugs",
+          "estimatedWatts": 100,
+          "fedFromSlot": 7,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Unfinished Basement",
+          "endpoint": "Ejector Pump",
+          "estimatedWatts": 500,
+          "fedFromSlot": 7,
+          "priority": "critical",
+          "notes": "Also has freezer plugged in right now",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [
+        "Circuits recorded on slot(s) [7] only. Both legs must be traced to confirm MWBC."
+      ],
+      "estimatedWattsTotal": 1000
+    },
+    {
+      "id": "A-9",
+      "panel": "A",
+      "slots": [
+        9
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0106687",
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Washer outlet",
+      "labelSource": "single circuit",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [
+        "truckAway"
+      ],
+      "circuits": [
+        {
+          "room": "Mud Room",
+          "endpoint": "Washer outlet",
+          "estimatedWatts": 500,
+          "fedFromSlot": 9,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 500
+    },
+    {
+      "id": "A-11",
+      "panel": "A",
+      "slots": [
+        11
+      ],
+      "poles": 1,
+      "amps": 15,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB115-T",
+        "legacyCatalogNumber": "LB115",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0146422",
+        "smartReplacement": "LB115-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Mud room + basement lights & plugs",
+      "shortLabel": "Mud room + basement lights",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Mud Room",
+          "endpoint": "Floor plugs",
+          "estimatedWatts": 100,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Mud Room",
+          "endpoint": "Counter electrical plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Mud Room",
+          "endpoint": "Island electrical plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Finished Basement",
+          "endpoint": "Overhead lights",
+          "estimatedWatts": 200,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Finished Basement",
+          "endpoint": "Floor electrical plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 11,
+          "notes": "1/2 on kitchen side",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Finished Basement",
+          "endpoint": "Kitchen light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Finished Basement",
+          "endpoint": "Bottom of stairs light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Basement Bathroom",
+          "endpoint": "Vanity Lights",
+          "estimatedWatts": 100,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Basement Bathroom",
+          "endpoint": "Bathroom Fan/Light",
+          "estimatedWatts": 100,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Basement Bathroom",
+          "endpoint": "Hallway Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Unfinished Basement",
+          "endpoint": "Overhead lights",
+          "estimatedWatts": 200,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 1480
+    },
+    {
+      "id": "A-13-15",
+      "panel": "A",
+      "slots": [
+        13,
+        15
+      ],
+      "poles": 2,
+      "amps": 15,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB215-T",
+        "legacyCatalogNumber": "LB215",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB215-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Bedrooms + office (internet) + full bath",
+      "shortLabel": "Bedrooms, office (net), bath",
+      "labelSource": "authored",
+      "circuitType": "probable MWBC (two 120V legs, shared neutral)",
+      "physicalMarking": null,
+      "priority": "critical",
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Master Bedroom",
+          "endpoint": "Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 13,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Master Bedroom",
+          "endpoint": "Floor electrical plug",
+          "estimatedWatts": 100,
+          "fedFromSlot": 13,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Master Bedroom",
+          "endpoint": "Exterior light switch",
+          "estimatedWatts": 60,
+          "fedFromSlot": 13,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Bedroom Hallway",
+          "endpoint": "Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 15,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Second Bedroom on Left",
+          "endpoint": "Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 15,
+          "priority": "critical",
+          "notes": "Office - INTERNET/NETWORKING",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Bedroom on Right",
+          "endpoint": "Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 15,
+          "notes": "Jordan's old room",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Bedroom on Right",
+          "endpoint": "Floor electrical plug",
+          "estimatedWatts": 100,
+          "fedFromSlot": 15,
+          "notes": "Jordan's old room",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Full Bath",
+          "endpoint": "Vanity Lights",
+          "estimatedWatts": 100,
+          "fedFromSlot": 15,
+          "notes": "Double check",
+          "verified": false,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Full Bath",
+          "endpoint": "Countertop Plug",
+          "estimatedWatts": 100,
+          "fedFromSlot": 15,
+          "notes": "Double check",
+          "verified": false,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [
+        "Circuits recorded on slot(s) [13, 15] only. Both legs must be traced to confirm MWBC."
+      ],
+      "estimatedWattsTotal": 700
+    },
+    {
+      "id": "A-17",
+      "panel": "A",
+      "slots": [
+        17
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Kitchen hood + hallway & mud room lights",
+      "shortLabel": "Kitchen hood + hall/mud lights",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Kitchen",
+          "endpoint": "Hood fan and light",
+          "estimatedWatts": 200,
+          "fedFromSlot": 17,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Kitchen Hallway",
+          "endpoint": "Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 17,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Mud Room",
+          "endpoint": "Lights",
+          "estimatedWatts": 100,
+          "fedFromSlot": 17,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Mud Room",
+          "endpoint": "Outside Carriage Lights",
+          "estimatedWatts": 100,
+          "fedFromSlot": 17,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 460
+    },
+    {
+      "id": "A-19-21",
+      "panel": "A",
+      "slots": [
+        19,
+        21
+      ],
+      "poles": 2,
+      "amps": 30,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB230-T",
+        "legacyCatalogNumber": "LB230",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB230-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Unidentified (30A 2-pole)",
+      "shortLabel": "Unidentified",
+      "labelSource": "placeholder",
+      "circuitType": "unidentified 2-pole",
+      "physicalMarking": "orange tape",
+      "priority": null,
+      "shedIn": [],
+      "circuits": [],
+      "notes": [],
+      "estimatedWattsTotal": 0
+    },
+    {
+      "id": "A-23-25",
+      "panel": "A",
+      "slots": [
+        23,
+        25
+      ],
+      "poles": 2,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB220-T",
+        "legacyCatalogNumber": "LB220",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB220-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Air Conditioner",
+      "labelSource": "single circuit",
+      "circuitType": "240V appliance",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [
+        "truckHome",
+        "truckAway"
+      ],
+      "circuits": [
+        {
+          "room": "Mud Room",
+          "endpoint": "Air Conditioner",
+          "estimatedWatts": 3500,
+          "fedFromSlot": [
+            23,
+            25
+          ],
+          "voltage": "240V",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [
+        "NEEDS VERIFICATION: recorded as 40A but the installed breaker is 20A 2-pole."
+      ],
+      "estimatedWattsTotal": 3500
+    },
+    {
+      "id": "A-27-29",
+      "panel": "A",
+      "slots": [
+        27,
+        29
+      ],
+      "poles": 2,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB220-T",
+        "legacyCatalogNumber": "LB220",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB220-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Unidentified (20A 2-pole)",
+      "shortLabel": "Unidentified",
+      "labelSource": "placeholder",
+      "circuitType": "unidentified 2-pole",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [],
+      "notes": [],
+      "estimatedWattsTotal": 0
+    },
+    {
+      "id": "A-2-4",
+      "panel": "A",
+      "slots": [
+        2,
+        4
+      ],
+      "poles": 2,
+      "amps": 30,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB230-T",
+        "legacyCatalogNumber": "LB230",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0114704",
+        "smartReplacement": "LB230-ST",
+        "photoVerified": true
+      },
+      "role": "generatorInlet",
+      "label": "Backup / generator inlet",
+      "shortLabel": "Backup / generator inlet",
+      "labelSource": "hardware",
+      "circuitType": "backup-feed",
+      "physicalMarking": "mechanical interlock plate",
+      "priority": null,
+      "shedIn": [],
+      "circuits": [],
+      "notes": [
+        "Not a load. Interlocked against the main breaker."
+      ],
+      "estimatedWattsTotal": 0
+    },
+    {
+      "id": "A-6",
+      "panel": "A",
+      "slots": [
+        6
+      ],
+      "poles": 1,
+      "amps": 15,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB115-T",
+        "legacyCatalogNumber": "LB115",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0109615",
+        "smartReplacement": "LB115-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Front of house \u2014 living room, foyer, porch, Myia's room",
+      "shortLabel": "Living rm, foyer, porch, Myia",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Living Room",
+          "endpoint": "Floor electrical plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 6,
+          "notes": "Eric lamp only",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Foyer",
+          "endpoint": "Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 6,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Foyer Closet",
+          "endpoint": "Floor electrical plug",
+          "estimatedWatts": 50,
+          "fedFromSlot": 6,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Front Porch",
+          "endpoint": "Carriage Lights & Light Pole",
+          "estimatedWatts": 100,
+          "fedFromSlot": 6,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Front Porch",
+          "endpoint": "Light Pole and electrical outlet",
+          "estimatedWatts": 100,
+          "fedFromSlot": 6,
+          "notes": "Outlet is next to water spigot and controlled by same switch",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Front Porch",
+          "endpoint": "Floor electrical plug",
+          "estimatedWatts": 50,
+          "fedFromSlot": 6,
+          "notes": "Double check",
+          "verified": false,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "First Bedroom on Left",
+          "endpoint": "Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 6,
+          "notes": "Myia's Bedroom",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "First Bedroom on Left",
+          "endpoint": "Floor electrical plug",
+          "estimatedWatts": 100,
+          "fedFromSlot": 6,
+          "notes": "Myia's Bedroom",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 720
+    },
+    {
+      "id": "A-8",
+      "panel": "A",
+      "slots": [
+        8
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0106687",
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Dining room plugs + TV / fireplace plugs",
+      "shortLabel": "Dining + TV/fireplace plugs",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Dining Room",
+          "endpoint": "Floor electrical plugs",
+          "estimatedWatts": 100,
+          "fedFromSlot": 8,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Family/TV Room",
+          "endpoint": "TV Plugs",
+          "estimatedWatts": 300,
+          "fedFromSlot": 8,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Family/TV Room",
+          "endpoint": "Fireplace plugs",
+          "estimatedWatts": 100,
+          "fedFromSlot": 8,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 500
+    },
+    {
+      "id": "A-10-12",
+      "panel": "A",
+      "slots": [
+        10,
+        12
+      ],
+      "poles": 2,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB220-T",
+        "legacyCatalogNumber": "LB220",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0101662",
+        "smartReplacement": "LB220-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Kitchen counter plugs + dishwasher",
+      "shortLabel": "Kitchen counter + dishwasher",
+      "labelSource": "authored",
+      "circuitType": "probable MWBC (two 120V legs, shared neutral)",
+      "physicalMarking": "orange tape",
+      "priority": null,
+      "shedIn": [
+        "truckAway"
+      ],
+      "circuits": [
+        {
+          "room": "Kitchen",
+          "endpoint": "Counter electrical plugs",
+          "estimatedWatts": 1500,
+          "fedFromSlot": 10,
+          "notes": "Coffee pot and air fryer. Slot 10 is half of the 20A 2-pole at 10/12 - likely one leg of a kitchen MWBC",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Kitchen",
+          "endpoint": "Dishwasher",
+          "estimatedWatts": 1800,
+          "fedFromSlot": 10,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [
+        "Circuits recorded on slot(s) [10] only. Both legs must be traced to confirm MWBC."
+      ],
+      "estimatedWattsTotal": 3300
+    },
+    {
+      "id": "A-14",
+      "panel": "A",
+      "slots": [
+        14
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0106687",
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Lamp floor plugs",
+      "labelSource": "single circuit",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Family/TV Room",
+          "endpoint": "Lamp floor plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 14,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 200
+    },
+    {
+      "id": "A-16",
+      "panel": "A",
+      "slots": [
+        16
+      ],
+      "poles": 1,
+      "amps": 15,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB115-T",
+        "legacyCatalogNumber": "LB115",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0109615",
+        "smartReplacement": "LB115-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Main floor lights \u2014 dining, living, family, kitchen",
+      "shortLabel": "Main floor lights",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Dining Room",
+          "endpoint": "Lights",
+          "estimatedWatts": 100,
+          "fedFromSlot": 16,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Living Room",
+          "endpoint": "Floor electrical plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 16,
+          "notes": "2 are switched and others are not",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Family/TV Room",
+          "endpoint": "Fan",
+          "estimatedWatts": 75,
+          "fedFromSlot": 16,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Family/TV Room",
+          "endpoint": "Track Lights",
+          "estimatedWatts": 200,
+          "fedFromSlot": 16,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Family/TV Room",
+          "endpoint": "Fireplace Lights",
+          "estimatedWatts": 60,
+          "fedFromSlot": 16,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Kitchen",
+          "endpoint": "Bay window light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 16,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Kitchen",
+          "endpoint": "Fluorescent Lights",
+          "estimatedWatts": 150,
+          "fedFromSlot": 16,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Kitchen",
+          "endpoint": "Pantry Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 16,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 905
+    },
+    {
+      "id": "A-18",
+      "panel": "A",
+      "slots": [
+        18
+      ],
+      "poles": 1,
+      "amps": 15,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB115-T",
+        "legacyCatalogNumber": "LB115",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB115-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Outside basement outlet and flood light",
+      "shortLabel": "Outside basement + flood light",
+      "labelSource": "single circuit",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Outside Basement",
+          "endpoint": "Outlet and flood light",
+          "estimatedWatts": 200,
+          "fedFromSlot": 18,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 200
+    },
+    {
+      "id": "A-20",
+      "panel": "A",
+      "slots": [
+        20
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Septic pump + doorbell",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": "critical",
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Outside",
+          "endpoint": "Septic Pump Tank",
+          "estimatedWatts": 750,
+          "fedFromSlot": 20,
+          "priority": "critical",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Outside",
+          "endpoint": "Doorbell",
+          "estimatedWatts": 10,
+          "fedFromSlot": 20,
+          "notes": "Transformer is in panel and goes up to doorbell chime",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 760
+    },
+    {
+      "id": "A-22",
+      "panel": "A",
+      "slots": [
+        22
+      ],
+      "poles": 1,
+      "amps": 15,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB115-T",
+        "legacyCatalogNumber": "LB115",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB115-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Master bath + closet lights",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Master Bedroom",
+          "endpoint": "Closet Light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 22,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Master Bathroom",
+          "endpoint": "Can Lights",
+          "estimatedWatts": 150,
+          "fedFromSlot": 22,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Master Bathroom",
+          "endpoint": "Vanity Lights",
+          "estimatedWatts": 100,
+          "fedFromSlot": 22,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Master Bathroom",
+          "endpoint": "Bath Fan",
+          "estimatedWatts": 50,
+          "fedFromSlot": 22,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 360
+    },
+    {
+      "id": "A-24",
+      "panel": "A",
+      "slots": [
+        24
+      ],
+      "poles": 1,
+      "amps": 15,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB115-T",
+        "legacyCatalogNumber": "LB115",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB115-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Half bath + foyer plug + toilet closet",
+      "shortLabel": "Half bath, foyer, toilet closet",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Half Bathroom",
+          "endpoint": "Vanity Lights",
+          "estimatedWatts": 100,
+          "fedFromSlot": 24,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Half Bathroom",
+          "endpoint": "Vent Fan",
+          "estimatedWatts": 50,
+          "fedFromSlot": 24,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Half Bathroom",
+          "endpoint": "Countertop Plug",
+          "estimatedWatts": 100,
+          "fedFromSlot": 24,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Foyer",
+          "endpoint": "Floor electrical plug",
+          "estimatedWatts": 50,
+          "fedFromSlot": 24,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Master Bathroom",
+          "endpoint": "Toilet closet fan",
+          "estimatedWatts": 50,
+          "fedFromSlot": 24,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Master Bathroom",
+          "endpoint": "Toilet closet light",
+          "estimatedWatts": 60,
+          "fedFromSlot": 24,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 410
+    },
+    {
+      "id": "A-26",
+      "panel": "A",
+      "slots": [
+        26
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Kitchen fridge + counter, floor & microwave plugs",
+      "shortLabel": "Kitchen fridge + microwave",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": "critical",
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Kitchen",
+          "endpoint": "Floor electrical plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 26,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Kitchen",
+          "endpoint": "Counter electrical plugs",
+          "estimatedWatts": 300,
+          "fedFromSlot": 26,
+          "notes": "One plug near door",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Kitchen",
+          "endpoint": "Refrigerator plug",
+          "estimatedWatts": 150,
+          "fedFromSlot": 26,
+          "priority": "critical",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Kitchen",
+          "endpoint": "Microwave plug",
+          "estimatedWatts": 1200,
+          "fedFromSlot": 26,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 1850
+    },
+    {
+      "id": "A-28",
+      "panel": "A",
+      "slots": [
+        28
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Sump Pump",
+      "labelSource": "single circuit",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": "critical",
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Unfinished Basement",
+          "endpoint": "Sump Pump",
+          "estimatedWatts": 800,
+          "fedFromSlot": 28,
+          "priority": "critical",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 800
+    },
+    {
+      "id": "A-30",
+      "panel": "A",
+      "slots": [
+        30
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Basement plugs \u2014 door side + water heater side",
+      "shortLabel": "Basement plugs (both sides)",
+      "labelSource": "authored",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Finished Basement",
+          "endpoint": "door side electrical plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 30,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        },
+        {
+          "room": "Unfinished Basement",
+          "endpoint": "Floor electrical plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 30,
+          "notes": "on side with hot water heater",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [],
+      "estimatedWattsTotal": 400
+    },
+    {
+      "id": "B-1-3",
+      "panel": "B",
+      "slots": [
+        1,
+        3
+      ],
+      "poles": 2,
+      "amps": 50,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB250-T",
+        "legacyCatalogNumber": "LB250",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0109618",
+        "smartReplacement": "LB250-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Cooktop",
+      "labelSource": "walkthrough",
+      "circuitType": "240V appliance",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [
+        "truckHome"
+      ],
+      "circuits": [
+        {
+          "room": "Kitchen",
+          "endpoint": "Stovetop",
+          "estimatedWatts": 7500,
+          "fedFromSlot": [
+            1,
+            3
+          ],
+          "voltage": "240V",
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [
+        "Amps corrected from 40 to 50 per photo.",
+        "Panel directory agrees: 1/3 = Cooktop."
+      ],
+      "estimatedWattsTotal": 7500
+    },
+    {
+      "id": "B-2-4",
+      "panel": "B",
+      "slots": [
+        2,
+        4
+      ],
+      "poles": 2,
+      "amps": 30,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB230-T",
+        "legacyCatalogNumber": "LB230",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0110778",
+        "smartReplacement": "LB230-ST",
+        "photoVerified": true
+      },
+      "role": "generatorInlet",
+      "label": "Backup / generator inlet (F-150 Lightning)",
+      "shortLabel": "Backup / generator inlet",
+      "labelSource": "hardware + directory",
+      "circuitType": "backup-feed",
+      "physicalMarking": "mechanical interlock plate",
+      "priority": null,
+      "shedIn": [],
+      "circuits": [],
+      "notes": [
+        "Not a load. Interlocked against the main breaker.",
+        "Under a mechanical interlock plate, same arrangement as Panel A 2/4.",
+        "CORRECTION: previously recorded as a 50A double oven. It is not a load at all.",
+        "Panel directory agrees: 2/4 = GEN INPUT."
+      ],
+      "estimatedWattsTotal": 0
+    },
+    {
+      "id": "B-6-8",
+      "panel": "B",
+      "slots": [
+        6,
+        8
+      ],
+      "poles": 2,
+      "amps": null,
+      "hardware": {
+        "photoVerified": true,
+        "confidence": "low",
+        "notes": "Not a recognizable Leviton branch breaker. Black body, no visible branding, handle or amp rating."
+      },
+      "role": "branch",
+      "label": "UNIDENTIFIED DEVICE (directory says 'Furn')",
+      "shortLabel": "UNIDENTIFIED - 'Furn'?",
+      "labelSource": "panel directory - unverified",
+      "circuitType": "unknown",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [],
+      "notes": [
+        "Occupies slots 6 and 8. Black-bodied, no visible Leviton branding, no visible ON/OFF handle from any supplied angle. Two heavy black conductors land immediately to its right.",
+        "Directory card reads 'Furn' for 6/8, which would fit the heat-pump air handler plus resistance heat strips - a load that would need a large 2-pole breaker.",
+        "ACTION: needs a straight-on or side photo to identify. Do not treat the amp rating as known.",
+        "WARNING: because no load is recorded, this device contributes 0 W to the Panel B load figure. If it is an air handler with resistance strips the real figure is far higher."
+      ],
+      "estimatedWattsTotal": 0
+    },
+    {
+      "id": "B-10-12",
+      "panel": "B",
+      "slots": [
+        10,
+        12
+      ],
+      "poles": 2,
+      "amps": 40,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB240-T",
+        "legacyCatalogNumber": "LB240",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB240-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Air conditioner / heat pump condenser (per directory)",
+      "shortLabel": "A/C condenser (unconfirmed)",
+      "labelSource": "panel directory - unverified",
+      "circuitType": "240V appliance",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [
+        "truckHome"
+      ],
+      "circuits": [],
+      "notes": [
+        "40A 2-pole confirmed from photo; the A/C attribution comes from the handwritten directory, not from the walkthrough.",
+        "Note there is also a 'Mud Room Air Conditioner' recorded on Panel A 23/25 (20A 2-pole). Either the house has two units, or one of these labels is wrong.",
+        "No load recorded, so this contributes 0 W to the Panel B load figure despite being a 40A circuit."
+      ],
+      "estimatedWattsTotal": 0
+    },
+    {
+      "id": "B-14-16",
+      "panel": "B",
+      "slots": [
+        14,
+        16
+      ],
+      "poles": 2,
+      "amps": 40,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB240-T",
+        "legacyCatalogNumber": "LB240",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB240-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Double oven (probable)",
+      "labelSource": "panel directory - unverified",
+      "circuitType": "240V appliance",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [
+        "truckHome"
+      ],
+      "circuits": [
+        {
+          "room": "Kitchen",
+          "endpoint": "Double oven",
+          "estimatedWatts": 5000,
+          "fedFromSlot": [
+            14,
+            16
+          ],
+          "voltage": "240V",
+          "notes": "Moved here from slots 2/4, which are the generator inlet.",
+          "verified": false,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [
+        "Directory reads 'OVEN' at 14/16. The walkthrough recorded the double oven as 'Panel B breaker 2', which cannot be right - 2/4 is the gen input.",
+        "The directory also reads 'Oven' at 5/7, but 5 and 7 are physically empty. Confirm which of these is the live oven circuit."
+      ],
+      "estimatedWattsTotal": 5000
+    },
+    {
+      "id": "B-9",
+      "panel": "B",
+      "slots": [
+        9
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0106687",
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Full bath fan/light/heater",
+      "labelSource": "walkthrough",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Full Bath",
+          "endpoint": "Fan/Light/Heater combo",
+          "estimatedWatts": 1500,
+          "fedFromSlot": 9,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [
+        "1500W resistive heater. Consider adding to the Panel B shed list once the inlet capacity is confirmed."
+      ],
+      "estimatedWattsTotal": 1500
+    },
+    {
+      "id": "B-11",
+      "panel": "B",
+      "slots": [
+        11
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0106687",
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Master bath vanity plugs",
+      "labelSource": "walkthrough",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Master Bathroom",
+          "endpoint": "Vanity Plugs",
+          "estimatedWatts": 200,
+          "fedFromSlot": 11,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [
+        "Directory card reads 'Washer' for slot 11, but the walkthrough puts the washer on Panel A slot 9. Trust the walkthrough."
+      ],
+      "estimatedWattsTotal": 200
+    },
+    {
+      "id": "B-13",
+      "panel": "B",
+      "slots": [
+        13
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": "0106687",
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Master bath floor plug",
+      "labelSource": "walkthrough",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Master Bathroom",
+          "endpoint": "Floor electrical plug",
+          "estimatedWatts": 100,
+          "fedFromSlot": 13,
+          "verified": true,
+          "verificationMethod": "breaker walk-through"
+        }
+      ],
+      "notes": [
+        "Amps corrected from 15 to 20 per photo.",
+        "Directory card reads 'Mster Heat/Fan' for slot 13."
+      ],
+      "estimatedWattsTotal": 100
+    },
+    {
+      "id": "B-26",
+      "panel": "B",
+      "slots": [
+        26
+      ],
+      "poles": 1,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB120-T",
+        "legacyCatalogNumber": "LB120",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB120-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Unidentified (20A 1-pole)",
+      "shortLabel": "Unidentified",
+      "labelSource": "placeholder",
+      "circuitType": "120V branch",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [],
+      "notes": [
+        "Installed and not recorded anywhere - blank on the directory card and absent from the walkthrough. One of the best candidates for the unmapped outlets in unassignedEndpoints."
+      ],
+      "estimatedWattsTotal": 0
+    },
+    {
+      "id": "B-28-30",
+      "panel": "B",
+      "slots": [
+        28,
+        30
+      ],
+      "poles": 2,
+      "amps": 20,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB220-T",
+        "legacyCatalogNumber": "LB220",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB220-ST",
+        "photoVerified": true
+      },
+      "role": "branch",
+      "label": "Surge protective device (probable)",
+      "shortLabel": "Surge protector (probable)",
+      "labelSource": "panel directory - unverified",
+      "circuitType": "240V device",
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [],
+      "notes": [
+        "Directory reads 'Surge' at slot 28. A 2-pole 20A feed matches a whole-house SPD.",
+        "A device with a green status LED is visible mounted below the panel in the overview photo - likely the SPD this feeds."
+      ],
+      "estimatedWattsTotal": 0
+    }
+  ],
+  "scenarios": {
+    "truckHome": {
+      "name": "Full Power Mode",
+      "shortName": "Truck Home",
+      "description": "Truck is home - use both Anker (Panel A) and Lightning (Panel B)",
+      "panelsAvailable": [
+        "A",
+        "B"
+      ],
+      "notes": "Both panels can be energized. Panel A is still limited by the Anker's 3800 W output, so the Panel A shed list applies. Panel B now has a real shed list (cooktop, A/C, oven), but three Panel B breakers have no loads traced - see the open question panel-b-load-understated before trusting the Panel B figure."
+    },
+    "truckAway": {
+      "name": "Conservation Mode",
+      "shortName": "Truck Away",
+      "description": "Truck is away - Anker only (Panel A)",
+      "panelsAvailable": [
+        "A"
+      ],
+      "notes": "Only 3.8 kWh available. Prioritize refrigerators, sump pump, ejector pump and internet. Avoid washer, dishwasher and high-draw appliances. Note A-10-12 is common trip: shedding it also kills slot 12."
+    }
+  },
+  "openQuestions": [
+    {
+      "id": "B-2-4-oven",
+      "panel": "B",
+      "deviceIds": [
+        "B-2-4",
+        "B-14-16"
+      ],
+      "recorded": "50A 2-pole double oven at Panel B slots 2/4",
+      "observed": "30A 2-pole generator inlet under a mechanical interlock plate",
+      "severity": "high",
+      "resolution": "SAFETY-RELEVANT, NOW FIXED. The previous Panel B walkthrough told the operator to shut off 2/4 as the 'double oven' - 2/4 is the inlet breaker, and the real oven would have stayed energized behind a 30A feed. The oven is reassigned to 14/16 pending confirmation. The directory also reads 'Oven' at 5/7, but 5 and 7 are physically empty; confirm which is the live oven circuit."
+    },
+    {
+      "id": "B-6-8-unknown",
+      "panel": "B",
+      "deviceIds": [
+        "B-6-8"
+      ],
+      "recorded": "Nothing recorded",
+      "observed": "An installed black 2-pole-width device with no visible branding, handle or amp rating",
+      "severity": "high",
+      "resolution": "Photograph straight-on to identify. Directory says 'Furn', which would fit a heat-pump air handler with resistance heat strips. Until identified its amp rating is unknown, it is in no shed list, and it contributes 0 W to the Panel B load figure - so that figure is optimistic by an unknown and potentially large margin."
+    },
+    {
+      "id": "panel-b-load-understated",
+      "panel": "B",
+      "deviceIds": [
+        "B-6-8",
+        "B-10-12",
+        "B-28-30"
+      ],
+      "recorded": "Panel B connected load computes from recorded circuits only",
+      "observed": "Three Panel B devices totalling 100A of breaker capacity have no circuits recorded",
+      "severity": "high",
+      "resolution": "The Panel B load meter reads far lower than reality. B-6-8 (unknown, 'Furn'), B-10-12 (40A A/C) and B-28-30 (20A surge) all contribute 0 W. Do not trust the Panel B figure until these are traced. The Panel A figure is sound."
+    },
+    {
+      "id": "A-23-25-ac",
+      "panel": "A",
+      "deviceIds": [
+        "A-23-25",
+        "A-19-21"
+      ],
+      "recorded": "40A 2-pole, Mud Room Air Conditioner, 3500W",
+      "observed": "20A 2-pole",
+      "severity": "high",
+      "resolution": "VERIFY BEFORE RELYING ON THIS. Either the AC is not on 23/25, or it is a much smaller unit than 3500W. A 3500W condenser would not run on a 20A 2-pole."
+    },
+    {
+      "id": "A-inlet-receptacle",
+      "panel": "A",
+      "deviceIds": [
+        "A-2-4"
+      ],
+      "recorded": "Not previously represented",
+      "observed": "Female L14-30 twist-lock face on the wall left of Panel A",
+      "severity": "high",
+      "resolution": "VERIFY. A female receptacle would require a male-to-male cord from the Anker's L14-30 output, which is neither safe nor code-compliant. Confirm whether this is actually a flanged power inlet (male pins) before the first real transfer."
+    },
+    {
+      "id": "A-19-21-identity",
+      "panel": "A",
+      "deviceIds": [
+        "A-19-21"
+      ],
+      "recorded": "20A 2-pole, unknown",
+      "observed": "30A 2-pole, orange tape, no circuits mapped",
+      "severity": "medium",
+      "resolution": "HYPOTHESIS: the 80-gallon electric water heater. It is in the unfinished basement (see the A-30 circuit note), a resistance tank that size is normally 30A 2-pole, and a water heater is exactly what you would tape for load shedding. Test by killing 19/21 and checking for hot water."
+    },
+    {
+      "id": "ac-count",
+      "panel": "both",
+      "deviceIds": [
+        "A-23-25",
+        "B-10-12"
+      ],
+      "recorded": "'Mud Room Air Conditioner' on Panel A 23/25",
+      "observed": "A 23/25 is a 20A 2-pole; B 10/12 is a 40A 2-pole the directory calls A/C",
+      "severity": "medium",
+      "resolution": "Determine whether there are two cooling units. B 10/12 fits a main heat pump condenser. A 23/25 at 20A would fit a mini-split or small unit."
+    },
+    {
+      "id": "A-mwbc-overlap",
+      "panel": "A",
+      "deviceIds": [
+        "A-5-7",
+        "A-10-12",
+        "A-13-15"
+      ],
+      "recorded": "120V circuits on slots 7, 10, 13 and 15, which are also halves of 2-pole breakers",
+      "observed": "Slots 5/7, 10/12 and 13/15 each carry a single 2-pole device",
+      "severity": "medium",
+      "resolution": "Most likely multi-wire branch circuits: two 120V legs sharing a neutral under a common-trip 2-pole handle. A 1974 house would commonly do this for kitchen counter circuits (10/12 fits the counter + dishwasher entries) and for bedroom/lighting runs. If so these are not 240V loads at all. Confirm by checking for a shared neutral at the panel."
+    },
+    {
+      "id": "A-unmapped",
+      "panel": "A",
+      "deviceIds": [
+        "A-19-21",
+        "A-23-25",
+        "A-27-29",
+        "A-5-7"
+      ],
+      "recorded": "No circuits recorded",
+      "observed": "Breakers installed with no endpoints traced",
+      "severity": "medium",
+      "resolution": "Still fully unidentified in Panel A: 19/21 (30A), 27/29 (20A). A-23-25 has a load recorded but the amperage contradicts it. A-5-7 has circuits on slot 7 only - the other leg is untraced."
+    },
+    {
+      "id": "B-26-unknown",
+      "panel": "B",
+      "deviceIds": [
+        "B-26"
+      ],
+      "recorded": "Nothing recorded",
+      "observed": "20A 1-pole installed",
+      "severity": "medium",
+      "resolution": "Unmapped 120V circuit - blank on the directory card and absent from the walkthrough. Test it against the four entries in unassignedEndpoints."
+    },
+    {
+      "id": "directory-cards-stale",
+      "panel": "both",
+      "deviceIds": [],
+      "recorded": "Handwritten directory cards in both panels",
+      "observed": "The Panel B card lists an oven at 5/7 (physically empty), a washer at 11 (the walkthrough puts it on A-9), and has no entry for slot 26",
+      "severity": "medium",
+      "resolution": "Treat this file as authoritative and the cards as historical. Both cards should be reprinted from this data."
+    },
+    {
+      "id": "A-orange-tape",
+      "panel": "A",
+      "deviceIds": [
+        "A-1-3",
+        "A-10-12",
+        "A-19-21"
+      ],
+      "recorded": "Not represented",
+      "observed": "Orange tape on three breakers: 1/3 (30A), 10/12 (20A), 19/21 (30A)",
+      "severity": "info",
+      "resolution": "Meaning of the tape is unknown. It may already encode a shed list or a verification pass. Note all three are high-draw or suspected high-draw circuits, which supports the shed-list reading."
+    }
+  ],
+  "safetyWarnings": [
+    {
+      "id": "trickle-charge",
+      "title": "Disconnect Trickle Charger",
+      "message": "BEFORE starting: Unplug the Anker F3800+ from its 120V trickle charge outlet.",
+      "panels": [
+        "A"
+      ],
+      "severity": "critical",
+      "showInWalkthrough": true
+    },
+    {
+      "id": "main-off-first",
+      "title": "Main Breaker First",
+      "message": "Always turn OFF the main breaker BEFORE engaging the generator/backup inlet breaker.",
+      "severity": "critical",
+      "showInWalkthrough": true
+    },
+    {
+      "id": "interlock",
+      "title": "Interlock Safety",
+      "message": "The interlock prevents the main breaker and generator inlet from being ON simultaneously. Never attempt to bypass this.",
+      "severity": "warning",
+      "showInWalkthrough": true
+    },
+    {
+      "id": "common-trip",
+      "title": "2-Pole Breakers Are Common Trip",
+      "message": "Slots 5/7, 10/12, 13/15, 19/21, 23/25 and 27/29 in Panel A each share one handle. Switching one slot off switches both. Plan shed lists by device, not by slot number.",
+      "severity": "warning",
+      "showInWalkthrough": false
+    }
+  ],
+  "walkthroughSteps": {
+    "panelA": [
+      {
+        "step": 1,
+        "title": "Unplug Anker Trickle Charger",
+        "instruction": "Locate the Anker F3800+ and unplug it from the 120V wall outlet it uses for trickle charging.",
+        "warning": "This must be done BEFORE connecting to the panel.",
+        "image": "images/panel-a/step1-unplug-anker.jpg",
+        "icon": "unplug"
+      },
+      {
+        "step": 2,
+        "title": "Turn Off High-Draw Breakers",
+        "instruction": "At Panel A, turn OFF these breakers to prevent overloading the Anker:",
+        "breakersToTurnOff": "scenario-dependent",
+        "image": "images/panel-a/step2-breakers-off.jpg",
+        "icon": "breaker-off"
+      },
+      {
+        "step": 3,
+        "title": "Turn Off Main Breaker",
+        "instruction": "Flip the MAIN breaker at Panel A to the OFF position.",
+        "warning": "This disconnects your home from the grid.",
+        "image": "images/panel-a/step3-main-off.jpg",
+        "icon": "main-off"
+      },
+      {
+        "step": 4,
+        "title": "Connect Anker to Panel",
+        "instruction": "Connect the Anker F3800+ output cable to the generator inlet on the wall immediately left of Panel A.",
+        "image": "images/panel-a/step4-connect-anker.jpg",
+        "icon": "connect"
+      },
+      {
+        "step": 5,
+        "title": "Engage Generator Inlet Breaker",
+        "instruction": "Slide the interlock plate and flip the 30A 2-pole generator inlet breaker (Panel A slots 2/4, top of the right column) to ON. The interlock should now allow this since the main is OFF.",
+        "image": "images/panel-a/step5-inlet-breaker-on.jpg",
+        "icon": "breaker-on"
+      },
+      {
+        "step": 6,
+        "title": "Turn On Anker",
+        "instruction": "Power on the Anker F3800+. Panel A circuits (except those turned off) should now have power.",
+        "image": "images/panel-a/step6-anker-power-on.jpg",
+        "icon": "power-on"
+      },
+      {
+        "step": 7,
+        "title": "Verify Critical Loads",
+        "instruction": "Check that the refrigerator, sump pump, and internet are working.",
+        "image": "images/panel-a/step7-verify-loads.jpg",
+        "icon": "verify"
+      }
+    ],
+    "panelB": [
+      {
+        "step": 1,
+        "title": "Position the Truck",
+        "instruction": "Park the F-150 Lightning near the outdoor 30A receptacle.",
+        "image": "images/panel-b/step1-truck-position.jpg",
+        "icon": "truck"
+      },
+      {
+        "step": 2,
+        "title": "Turn Off High-Draw Breakers",
+        "instruction": "At Panel B, turn OFF these breakers:",
+        "breakersToTurnOff": "scenario-dependent",
+        "image": "images/panel-b/step2-breakers-off.jpg",
+        "icon": "breaker-off",
+        "warning": "CORRECTED: an earlier version listed slots 2/4 here as the double oven. 2/4 is the GENERATOR INLET and must stay available - do not switch it off."
+      },
+      {
+        "step": 3,
+        "title": "Turn Off Main Breaker",
+        "instruction": "Flip the MAIN breaker at Panel B to the OFF position.",
+        "image": "images/panel-b/step3-main-off.jpg",
+        "icon": "main-off"
+      },
+      {
+        "step": 4,
+        "title": "Connect Truck to Receptacle",
+        "instruction": "Using the truck's bed-mounted 30A power outlet, connect to the outdoor receptacle with the appropriate cable.",
+        "image": "images/panel-b/step4-connect-truck.jpg",
+        "icon": "connect"
+      },
+      {
+        "step": 5,
+        "title": "Enable Pro Power Onboard",
+        "instruction": "In the truck, enable Pro Power Onboard and select the appropriate output level.",
+        "image": "images/panel-b/step5-pro-power-onboard.jpg",
+        "icon": "power-on"
+      },
+      {
+        "step": 6,
+        "title": "Engage Generator Inlet Breaker",
+        "instruction": "Flip the generator inlet breaker at Panel B to ON.",
+        "warning": "Slots 2/4, top of the right column, under the interlock plate. The outdoor receptacle configuration is not yet confirmed - check it before the first real transfer.",
+        "image": "images/panel-b/step6-inlet-breaker-on.jpg",
+        "icon": "breaker-on"
+      },
+      {
+        "step": 7,
+        "title": "Verify Panel B Loads",
+        "instruction": "Check that Panel B circuits are receiving power.",
+        "image": "images/panel-b/step7-verify-loads.jpg",
+        "icon": "verify"
+      }
+    ],
+    "rechargeAnkerFromTruck": [
+      {
+        "step": 1,
+        "title": "Check Anker Battery Level",
+        "instruction": "If the Anker F3800+ is running low, you can recharge it from the Lightning.",
+        "icon": "battery"
+      },
+      {
+        "step": 2,
+        "title": "Connect Charging Cable",
+        "instruction": "Connect a charging cable from one of the truck's outlets to the Anker's AC input.",
+        "icon": "connect"
+      },
+      {
+        "step": 3,
+        "title": "Monitor Charging",
+        "instruction": "The Anker can charge while also providing backup power (pass-through charging).",
+        "icon": "charging"
+      }
+    ]
+  },
+  "roomAliases": {
+    "First Bedroom on Left": "Myia's Bedroom",
+    "Second Bedroom on Left": "Office",
+    "Bedroom on Right": "Jordan's Room"
+  },
+  "metadata": {
+    "lastUpdated": "2026-08-07",
+    "notes": "Device-first schema. One entry per physical breaker; circuits nest underneath. Shed lists live on devices via shedIn so common-trip behaviour is explicit and there is one source of truth. Handwritten panel directory cards are historical, not authoritative.",
+    "changelog": [
+      {
+        "version": "2.2",
+        "date": "2026-08-07",
+        "summary": "Panel B photo inventory: 10 devices, all 30 slots reconciled (16 occupied, 14 empty). Slots 2/4 identified as the generator inlet - previously recorded as a 50A double oven, which put the inlet on the Panel B shed list. Oven reassigned to 14/16. B-1-3 40A->50A, B-13 15A->20A. One unidentified device at B 6/8. Circuits now carry verified / verificationMethod. Added unassignedEndpoints and panels.*.emptySlots; dropped slotsSurveyed (now derived from slot reconciliation). Resolved open questions retired to this changelog."
+      },
+      {
+        "version": "2.1",
+        "date": "2026-08-07",
+        "summary": "Moved to blackstart repo. Shed lists derived from devices[].shedIn (dropped scenarios.shedDevices/shedDeviceLabels). Added panels.*.slotsSurveyed and a Panel B generatorInlet stub. Rewrote auto-generated device labels. Panel B walkthrough shed list now scenario-derived."
+      },
+      {
+        "version": "2.0",
+        "date": "2026-08-07",
+        "summary": "Restructured to device-first. Panel A hardware photo-verified; Panel B carried forward unverified."
+      },
+      {
+        "version": "1.1",
+        "date": "2026-08-07",
+        "summary": "Panel A physical breaker inventory from photos. Corrected amps on slots 8, 13/15, 14, 17, 18, 19/21, 23/25. Identified slots 2/4 as the generator inlet breaker under a mechanical interlock. Flagged slots 5/7, 10/12, 13/15 as probable MWBCs."
+      },
+      {
+        "version": "1.0",
+        "date": "2025-01-31",
+        "summary": "Initial setup."
+      }
+    ]
+  },
+  "unassignedEndpoints": [
+    {
+      "room": "Bedroom Hallway",
+      "endpoint": "OLD WHOLE HOUSE FAN",
+      "notes": "No longer hooked up, but the circuit is unknown."
+    },
+    {
+      "room": "Second Bedroom on Left",
+      "endpoint": "Floor electrical plug",
+      "notes": "Office. Not traced."
+    },
+    {
+      "room": "Second Bedroom on Left",
+      "endpoint": "Closet plug",
+      "notes": "Office. Not traced."
+    },
+    {
+      "room": "Outside Driveway",
+      "endpoint": "Electrical plug",
+      "notes": "Not traced."
+    }
+  ]
+}
