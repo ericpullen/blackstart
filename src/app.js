@@ -133,12 +133,15 @@
       host.innerHTML = Object.keys(d.panels).map(function (p) {
         var panel = d.panels[p];
         var src = d.backupSources[panel.backupSource] || {};
-        return '<div class="status-card panel-' + esc(p.toLowerCase()) + '">' +
-          '<h3>' + esc(panel.name) + '</h3>' +
-          '<div class="value" style="color: var(--panel-' + esc(p.toLowerCase()) + ')">' +
-          esc(src.shortName || src.name || '—') + '</div>' +
-          '<div class="label">' + esc(src.capacityKwh ? src.capacityKwh + ' kWh backup' : 'no source') +
-          '</div>' +
+        var stats = [];
+        if (src.capacityKwh) stats.push(src.capacityKwh + ' kWh stored');
+        if (src.maxOutputWatts) stats.push(watts(src.maxOutputWatts) + ' max');
+        return '<div class="status-card">' +
+          '<div class="card-top"><span class="panel-chip ' + esc(p.toLowerCase()) + '">' +
+          esc(p) + '</span>' + esc(panel.name) + '</div>' +
+          '<div class="src-name">' + esc(src.name || 'No backup source') + '</div>' +
+          (stats.length ? '<div class="src-stats">' + esc(stats.join(' · ')) + '</div>' : '') +
+          (src.connectionType ? '<div class="src-loc">' + esc(src.connectionType) + '</div>' : '') +
           (panel.slotsSurveyed === false ? '<div class="card-flag">Not surveyed</div>' : '') +
           '</div>';
       }).join('');
@@ -192,7 +195,7 @@
 
     list.innerHTML = rows.map(function (c) {
       var tags = [];
-      if (c.priority === 'critical') tags.push('<span class="tag critical">⚠ Critical</span>');
+      if (c.priority === 'critical') tags.push('<span class="tag critical">Critical</span>');
       if (c.estimatedWatts) tags.push('<span class="tag watts">' + esc(watts(c.estimatedWatts)) + '</span>');
       if (c.voltage === '240V') tags.push('<span class="tag volts">240V</span>');
       if (c.verified === false && !c.unmapped) {
@@ -213,7 +216,8 @@
           '</button>';
       }
 
-      return '<button type="button" class="circuit-item panel-' + esc(c.panel.toLowerCase()) + '"' +
+      return '<button type="button" class="circuit-item' +
+        (c.priority === 'critical' ? ' taped' : '') + '"' +
         ' data-device="' + esc(c.deviceId) + '" data-circuit="' + c.circuitIndex + '">' +
         '<div class="circuit-header">' +
         '<span class="circuit-endpoint">' + esc(c.endpoint) + '</span>' +
@@ -279,12 +283,16 @@
   }
 
   function slotHtml(slot, entry, panel, questions, panelKey) {
+    /* Odd slots sit in the left column, even in the right — and the handle bar
+     * is drawn on the center-facing edge, same as the physical panel. */
+    var side = slot % 2 === 1 ? 'side-l' : 'side-r';
+
     /* No device here. "Declared empty" (we looked, nothing there) and
      * "unaccounted" (nobody looked) are different claims and must not both
      * render as "Empty". */
     if (!entry) {
       var declaredEmpty = (panel.emptySlots || []).indexOf(slot) >= 0;
-      return '<div class="breaker-slot ' + (declaredEmpty ? 'empty' : 'unsurveyed') + '">' +
+      return '<div class="breaker-slot ' + side + ' ' + (declaredEmpty ? 'empty' : 'unsurveyed') + '">' +
         '<span class="slot-num">#' + slot + '</span>' +
         '<span class="slot-label">' + (declaredEmpty ? 'Empty' : 'Not surveyed') + '</span></div>';
     }
@@ -294,12 +302,13 @@
     /* The lower half of a 2-pole breaker. Not clickable — the handle is one
      * unit, so the top half owns the interaction. */
     if (!entry.primary) {
-      return '<div class="breaker-slot continued">' +
+      return '<div class="breaker-slot continued ' + side +
+        (d.role === Model.ROLE_INLET ? ' inlet-cont' : '') + '">' +
         '<span class="slot-num">#' + slot + '</span>' +
         '<span class="slot-label">↑ same handle</span></div>';
     }
 
-    var cls = ['breaker-slot'];
+    var cls = ['breaker-slot', side];
     if (d.role === Model.ROLE_INLET) cls.push('inlet');
     if (d.priority === 'critical') cls.push('critical');
     if (!d.circuits || !d.circuits.length) {
@@ -526,9 +535,13 @@
         }, 0);
         return '<button type="button" class="scenario-btn' + (k === state.scenario ? ' active' : '') +
           '" data-scenario="' + esc(k) + '">' +
+          '<span class="scenario-tick"><svg fill="none" stroke="currentColor" stroke-width="3" ' +
+          'stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">' +
+          '<path d="M5 13l4 4L19 7"/></svg></span>' +
           '<h4>' + esc(sc.shortName || sc.name) + '</h4>' +
           '<p>' + esc(sc.name) + '</p>' +
-          '<div class="capacity">' + esc(kwh ? kwh.toFixed(1) + ' kWh' : '—') + '</div>' +
+          '<div class="capacity">' + esc(kwh ? kwh.toFixed(1) : '—') +
+          ' <span class="cap-unit">kWh stored</span></div>' +
           '</button>';
       }).join('');
     }
@@ -557,8 +570,14 @@
 
       var host = el('steps-' + key);
       if (host) {
-        host.innerHTML = (data.walkthroughSteps[key] || []).map(function (step, i) {
-          return stepHtml(step, i, key, p);
+        /* The first incomplete step is where the reader actually is. Light it. */
+        var steps = data.walkthroughSteps[key] || [];
+        var current = -1;
+        for (var i = 0; i < steps.length; i++) {
+          if (state.completed[key].indexOf(i) < 0) { current = i; break; }
+        }
+        host.innerHTML = steps.map(function (step, i) {
+          return stepHtml(step, i, key, p, i === current);
         }).join('');
       }
 
@@ -573,11 +592,13 @@
     var s = Model.loadSummary(state.data, p, state.scenario);
     if (!s.sourceWatts) return '';
 
-    var pct = Math.round(s.ratio * 100);
+    var pct = Math.min(100, Math.round(s.ratio * 100));
     return '<div class="load-meter' + (s.over ? ' over' : '') + '">' +
       '<div class="load-head">' +
-      '<span>After shedding: ' + esc(watts(s.remainingWatts)) + ' connected</span>' +
-      '<span>' + esc(s.sourceShortName) + ' max ' + esc(watts(s.sourceWatts)) + '</span>' +
+      '<div class="load-figure"><small>Connected after shedding</small>' +
+      '<strong>' + esc(watts(s.remainingWatts)) + '</strong></div>' +
+      '<div class="load-figure load-max"><small>' + esc(s.sourceShortName) + ' max output</small>' +
+      esc(watts(s.sourceWatts)) + '</div>' +
       '</div>' +
       '<div class="load-bar"><div class="load-fill" style="width:' + pct + '%"></div></div>' +
       '<p class="load-note">' +
@@ -605,7 +626,7 @@
       '</div>';
   }
 
-  function stepHtml(step, index, key, panel) {
+  function stepHtml(step, index, key, panel, isCurrent) {
     var done = state.completed[key].indexOf(index) >= 0;
     var html = '';
 
@@ -638,19 +659,20 @@
         '</div>';
     }
 
-    html += '<div class="step-item' + (done ? ' completed' : '') + '" data-step="' + index +
-      '" data-panel-key="' + esc(key) + '">' +
+    html += '<div class="step-item' + (done ? ' completed' : '') + (isCurrent ? ' current' : '') +
+      '" data-step="' + index + '" data-panel-key="' + esc(key) + '">' +
       '<button type="button" class="step-toggle" aria-pressed="' + done + '">' +
-      '<span class="step-check"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+      '<span class="step-num">' +
+      '<span class="num">' + esc(step.step != null ? step.step : index + 1) + '</span>' +
+      '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
       '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>' +
       '</svg></span>' +
       '<span class="step-content">' +
-      '<span class="step-title">' + icon(step.icon) +
-      'Step ' + esc(step.step != null ? step.step : index + 1) + ': ' + esc(step.title) + '</span>' +
+      '<span class="step-title">' + icon(step.icon) + esc(step.title) + '</span>' +
       '<span class="step-instruction">' + esc(step.instruction) + '</span>' +
       '</span></button>' +
       breakers +
-      (step.warning ? '<div class="step-warning">⚠️ ' + esc(step.warning) + '</div>' : '') +
+      (step.warning ? '<div class="step-warning">' + esc(step.warning) + '</div>' : '') +
       image +
       '</div>';
 
