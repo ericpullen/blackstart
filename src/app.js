@@ -202,6 +202,21 @@
         tags.push('<span class="tag unverified">Unconfirmed</span>');
       }
 
+      /* Loads behind a subpanel get a row too, flagged so nobody goes looking
+       * for a breaker in the garage that does not exist. */
+      if (c.subpanelId) {
+        tags.push('<span class="tag untraced">No breaker in Panel ' + esc(c.panel) + '</span>');
+        return '<button type="button" class="circuit-item subpanel-item"' +
+          ' data-subpanel="' + esc(c.subpanelId) + '">' +
+          '<div class="circuit-header">' +
+          '<span class="circuit-endpoint">' + esc(c.endpoint) + '</span>' +
+          '<span class="circuit-breaker">' + esc(c.panel + '-' + c.slotLabel) + '</span>' +
+          '</div>' +
+          '<div class="circuit-room">' + esc(c.displayRoom) + '</div>' +
+          '<div class="circuit-tags">' + tags.join('') + '</div>' +
+          '</button>';
+      }
+
       /* An endpoint with no known breaker still gets a row. Hiding it would
        * imply it doesn't exist; the honest answer is "we don't know yet". */
       if (c.unmapped) {
@@ -265,6 +280,8 @@
       html += slotHtml(row + 1, slots[row + 1], panel, questions, p);
     }
     grid.innerHTML = html;
+
+    renderSubpanels(p);
   }
 
   function mainBreakerHtml(p, panel) {
@@ -302,17 +319,28 @@
     /* The lower half of a 2-pole breaker. Not clickable — the handle is one
      * unit, so the top half owns the interaction. */
     if (!entry.primary) {
+      /* A feed-through lug has no handle to be the other half OF, so say what
+       * it actually is rather than pointing at a handle that isn't there. */
+      var contLabel = Model.isFeedThrough(d) ? '↑ same lug' : '↑ same handle';
       return '<div class="breaker-slot continued ' + side +
-        (d.role === Model.ROLE_INLET ? ' inlet-cont' : '') + '">' +
+        (d.role === Model.ROLE_INLET ? ' inlet-cont' : '') +
+        (Model.isFeedThrough(d) ? ' feedthrough-cont' : '') + '">' +
         '<span class="slot-num">#' + slot + '</span>' +
-        '<span class="slot-label">↑ same handle</span></div>';
+        '<span class="slot-label">' + contLabel + '</span></div>';
     }
+
+    var feedThrough = Model.isFeedThrough(d);
+    var sub = feedThrough ? Model.subpanelOfDevice(state.data, d) : null;
 
     var cls = ['breaker-slot', side];
     if (d.role === Model.ROLE_INLET) cls.push('inlet');
+    if (feedThrough) cls.push('feedthrough');
     if (d.priority === 'critical') cls.push('critical');
     if (!d.circuits || !d.circuits.length) {
-      if (d.role !== Model.ROLE_INLET) cls.push('unknown-load');
+      /* "untraced" means a breaker whose loads nobody followed. Neither the
+       * inlet nor a feed-through lug is that — one is the source, the other
+       * has its loads recorded on the subpanel it feeds. */
+      if (d.role === Model.ROLE_BRANCH) cls.push('unknown-load');
     }
     if (d.poles === 2) cls.push('double-top');
 
@@ -320,16 +348,22 @@
     if (Model.isUnverified(d)) badges += '<span class="slot-badge unverified" title="Hardware not photo-verified">?</span>';
     if (questions[d.id]) badges += '<span class="slot-badge question" title="Has an open question">!</span>';
 
-    /* amps can legitimately be null for an installed-but-unidentified device. */
-    var rating = (d.amps === null || d.amps === undefined) ? '?A' : d.amps + 'A';
+    /* amps can legitimately be null: an installed-but-unidentified device, or
+     * a feed-through lug that has no rating because it has no handle. Those
+     * are different claims and must not read the same. */
+    var meta;
+    if (feedThrough) {
+      meta = 'NO HANDLE' + (sub ? ' · feeds ' + (sub.shortName || sub.name) : '');
+    } else {
+      meta = ((d.amps === null || d.amps === undefined) ? '?A' : d.amps + 'A') +
+        (d.circuits && d.circuits.length > 1 ? ' · ' + d.circuits.length + ' loads' : '') +
+        (d.role === Model.ROLE_BRANCH && (!d.circuits || !d.circuits.length) ? ' · untraced' : '');
+    }
 
     return '<button type="button" class="' + cls.join(' ') + '" data-device="' + esc(d.id) + '">' +
       '<span class="slot-num">#' + slot + (d.poles === 2 ? '/' + d.slots[1] : '') + '</span>' +
       '<span class="slot-label">' + esc(d.label) + '</span>' +
-      '<span class="slot-meta">' + esc(rating) +
-      (d.circuits && d.circuits.length > 1 ? ' · ' + d.circuits.length + ' loads' : '') +
-      (d.role !== Model.ROLE_INLET && (!d.circuits || !d.circuits.length) ? ' · untraced' : '') +
-      '</span>' + badges +
+      '<span class="slot-meta">' + esc(meta) + '</span>' + badges +
       '</button>';
   }
 
@@ -393,18 +427,44 @@
     if (d.role === Model.ROLE_INLET) {
       html += '<div class="modal-callout">This is the backup feed, not a load. ' +
         'It is interlocked against the main breaker — they can never both be ON.</div>';
+      html += inletConnectionHtml(panel);
+    }
+    var fedSub = Model.subpanelOfDevice(data, d);
+    if (Model.isFeedThrough(d)) {
+      html += '<div class="modal-callout warn"><strong>This is not a breaker.</strong> ' +
+        'It is a plug-on lug that taps the bus and passes the feed straight through. ' +
+        'There is no handle here and nothing to switch off. Everything downstream is ' +
+        'protected only by this panel\'s ' +
+        esc((panel.mainBreaker || {}).amps ? panel.mainBreaker.amps + 'A main' : 'main breaker') +
+        '.' + (fedSub
+          ? ' The only disconnect for those loads is inside the ' + esc(fedSub.name) +
+            ' — ' + esc(fedSub.location) + '.'
+          : '') + '</div>';
     }
     if (Model.needsLabelReview(d)) {
       html += '<div class="modal-callout warn">This breaker\'s label is a placeholder ' +
         '(' + esc(d.labelSource) + ') and still needs rewriting.</div>';
     }
 
-    html += detailRow('Breaker', esc(d.panel + '-' + Model.slotLabel(d)));
+    html += detailRow(Model.isFeedThrough(d) ? 'Position' : 'Breaker',
+      esc(d.panel + '-' + Model.slotLabel(d)));
     html += detailRow('Panel', esc(panel.name || d.panel) + (panel.location ? ' · ' + esc(panel.location) : ''));
-    html += detailRow('Rating', esc((d.amps === null || d.amps === undefined
-      ? 'amperage unknown' : d.amps + 'A') + ' · ' + d.poles + '-pole'));
+    html += detailRow('Rating', Model.isFeedThrough(d)
+      ? esc('no overcurrent protection · ' + d.poles + ' pole-spaces')
+      : esc((d.amps === null || d.amps === undefined
+        ? 'amperage unknown' : d.amps + 'A') + ' · ' + d.poles + '-pole'));
     if (d.circuitType) html += detailRow('Type', esc(d.circuitType));
-    if (d.physicalMarking) html += detailRow('Marking', esc(d.physicalMarking));
+    if (d.equipment) {
+      var eq = d.equipment;
+      html += detailRow('Equipment', esc([eq.manufacturer, eq.model].filter(Boolean).join(' ') ||
+        eq.description || '—'));
+    }
+    if (d.physicalMarking) {
+      html += detailRow('Marking', esc(d.physicalMarking) +
+        (d.physicalMarkingMeaning
+          ? ' <span class="detail-hint">' + esc(d.physicalMarkingMeaning) + '</span>'
+          : ''));
+    }
     if (Model.isLoad(d)) {
       html += detailRow('Connected load', esc(watts(d.estimatedWattsTotal)) +
         ' <span class="detail-hint">estimated</span>');
@@ -437,9 +497,26 @@
           (c.notes ? '<div class="circuit-line-note">' + esc(c.notes) + '</div>' : '') +
           '</div>';
       }).join('');
-    } else if (d.role !== Model.ROLE_INLET) {
+    } else if (d.role === Model.ROLE_BRANCH) {
       html += '<div class="modal-callout warn">This breaker is installed but nothing is ' +
         'recorded on it yet. Trace it before relying on the panel schedule.</div>';
+    }
+
+    if (fedSub) html += subpanelHtml(fedSub);
+
+    /* the appliance on the end of it, when we know what it is */
+    if (d.equipment && (d.equipment.description || d.equipment.productUrl)) {
+      html += '<div class="detail-section">Equipment</div>';
+      if (d.equipment.description) {
+        html += '<div class="modal-callout">' + esc(d.equipment.description) + '</div>';
+      }
+      /* Validated as https:// in validate.js — never render an unchecked href. */
+      if (d.equipment.productUrl) {
+        html += '<div class="modal-callout">Product page (needs a connection): ' +
+          '<a class="ext-link" href="' + esc(d.equipment.productUrl) +
+          '" rel="noreferrer noopener" target="_blank">' +
+          esc(d.equipment.model || d.equipment.productUrl) + '</a></div>';
+      }
     }
 
     /* hardware */
@@ -468,6 +545,140 @@
     });
 
     openModal(d.label, html);
+  }
+
+  /* What physically plugs into the inlet. The gender of the house-side
+   * connector is the fact worth leading with: male pins mean an ordinary cord,
+   * and the alternative is somebody improvising one with live exposed pins. */
+  function inletConnectionHtml(panel) {
+    var inlet = (panel || {}).generatorInlet || {};
+    var c = inlet.connection;
+    if (!c) return '';
+
+    var cable = (state.data.cables || {})[inlet.cable];
+    var html = '<div class="detail-section">What plugs in here</div>';
+
+    if (c.location) html += detailRow('Where', esc(c.location));
+    if (c.deviceType) html += detailRow('Inlet', esc(c.deviceType));
+    if (c.configuration) html += detailRow('Configuration', esc(c.configuration));
+    if (c.manufacturer || c.model) {
+      html += detailRow('Part', esc([c.manufacturer, c.model].filter(Boolean).join(' ')) +
+        (c.modelConfidence && c.modelConfidence !== 'high'
+          ? ' <span class="detail-hint">model ' + esc(c.modelConfidence) + ' confidence</span>'
+          : ''));
+    }
+    if (cable) {
+      html += detailRow('Cable', esc(cable.name));
+      html += '<div class="modal-callout">' + esc(cable.howItConnects || cable.ends) + '</div>';
+    }
+    if (c.notes) {
+      html += '<div class="modal-callout' + (c.confidence === 'high' ? '' : ' warn') + '">' +
+        esc(c.notes) + '</div>';
+    }
+    return html;
+  }
+
+  /* Everything downstream of a feed-through tap, rendered the same way in the
+   * breaker modal and on the panel view. The load-bearing facts are: where the
+   * disconnect physically is, that the parent panel has none, and that the
+   * appliance total is NOT the sum of the breakers feeding it. */
+  function subpanelHtml(sp) {
+    var html = '<div class="detail-section">' + esc(sp.name) + '</div>';
+
+    html += '<div class="modal-callout warn"><strong>No breaker in Panel ' +
+      esc((sp.fedFrom || {}).panel || '?') + ' disconnects this.</strong> ' +
+      esc(sp.disconnectArrangement || 'Its disconnecting means is inside the subpanel.') +
+      ' Location: ' + esc(sp.location) + '.</div>';
+
+    html += detailRow('Fed from', esc((sp.fedFrom || {}).panel + '-' +
+      ((sp.fedFrom || {}).deviceId || '?').replace(/^[A-Z]-/, '')));
+    if (sp.feeder) {
+      html += detailRow('Feeder', esc(sp.feeder.conductor +
+        (sp.feeder.ampacityAmps ? ' · ~' + sp.feeder.ampacityAmps + 'A' : '')));
+      html += detailRow('Protected by', esc(sp.feeder.protectedBy || 'unknown'));
+    }
+    html += detailRow('Connected load', esc(watts(sp.estimatedWattsTotal)) +
+      ' <span class="detail-hint">cannot be shed at the panel</span>');
+    if (sp.enclosure && sp.enclosure.description) {
+      html += detailRow('Enclosure', esc(sp.enclosure.description));
+    }
+
+    if ((sp.devices || []).length) {
+      html += '<div class="detail-section">Breakers inside it</div>';
+      html += (sp.devices || []).map(function (d) {
+        var serves = (d.serves || []).map(function (aid) {
+          var a = (sp.appliances || []).filter(function (x) { return x.id === aid; })[0];
+          return a ? a.endpoint : aid;
+        }).join(', ');
+        return '<div class="circuit-line">' +
+          '<div class="circuit-line-head"><span>' + esc(d.label) + '</span>' +
+          '<span class="circuit-line-watts">' +
+          esc((d.amps === null || d.amps === undefined ? '?' : d.amps + 'A') +
+            (d.poles === 2 ? ' 2-pole' : '')) + '</span></div>' +
+          (serves ? '<div class="circuit-line-sub">serves ' + esc(serves) + '</div>' : '') +
+          noteList(d.notes).map(function (n) {
+            return '<div class="circuit-line-note">' + esc(n) + '</div>';
+          }).join('') +
+          '</div>';
+      }).join('');
+    }
+
+    if ((sp.appliances || []).length) {
+      html += '<div class="detail-section">What it actually feeds</div>';
+      html += (sp.appliances || []).map(function (a) {
+        return '<div class="circuit-line">' +
+          '<div class="circuit-line-head"><span>' + esc(a.endpoint) + '</span>' +
+          '<span class="circuit-line-watts">' + esc(watts(a.estimatedWatts)) + '</span></div>' +
+          '<div class="circuit-line-sub">' + esc(a.displayRoom || a.room) +
+          (a.model ? ' · ' + esc(a.manufacturer ? a.manufacturer + ' ' + a.model : a.model) : '') +
+          (a.verified === false ? ' · <span class="inline-warn">unconfirmed</span>' : '') +
+          '</div>' +
+          (a.rating ? '<div class="circuit-line-sub">' + esc(a.rating) + '</div>' : '') +
+          (a.notes ? '<div class="circuit-line-note">' + esc(a.notes) + '</div>' : '') +
+          '</div>';
+      }).join('');
+    }
+
+    if (sp.monitoring && sp.monitoring.smartBreakerMonitorable === false) {
+      html += '<div class="modal-callout"><strong>Not smart-breaker monitorable.</strong> ' +
+        esc(sp.monitoring.reason) +
+        (sp.monitoring.instrumentationPath ? ' ' + esc(sp.monitoring.instrumentationPath) : '') +
+        '</div>';
+    }
+
+    noteList(sp.notes).forEach(function (n) {
+      html += '<div class="modal-callout">' + esc(n) + '</div>';
+    });
+
+    return html;
+  }
+
+  function showSubpanel(id) {
+    var sp = Model.subpanelById(state.data, id);
+    if (!sp) return;
+    openModal(sp.name, subpanelHtml(sp));
+  }
+
+  /* A card under the panel grid, because a reader standing at Panel B needs to
+   * learn that part of this panel's load lives in another enclosure BEFORE
+   * they conclude a breaker sweep switched everything off. */
+  function renderSubpanels(p) {
+    var host = el('panel-' + p.toLowerCase() + '-subpanels');
+    if (!host) return;
+    var subs = Model.subpanelsFedFrom(state.data, p);
+    if (!subs.length) { host.innerHTML = ''; return; }
+
+    host.innerHTML = subs.map(function (sp) {
+      return '<button type="button" class="subpanel-card" data-subpanel="' + esc(sp.id) + '">' +
+        '<div class="subpanel-head"><span class="subpanel-tag">Downstream subpanel</span>' +
+        '<span class="subpanel-watts">' + esc(watts(sp.estimatedWattsTotal)) + '</span></div>' +
+        '<div class="subpanel-name">' + esc(sp.name) + '</div>' +
+        '<div class="subpanel-sub">Fed through ' +
+        esc((sp.fedFrom || {}).deviceId || '?') + ' · ' + esc(sp.location) + '</div>' +
+        '<div class="subpanel-warn">No breaker in Panel ' + esc(p) +
+        ' can switch this off.</div>' +
+        '</button>';
+    }).join('');
   }
 
   function showCircuit(deviceId, circuitIndex) {
@@ -612,6 +823,24 @@
         ? '<p class="load-note dim">Shedding ' + s.shedDevices.length + ' breaker' +
         (s.shedDevices.length > 1 ? 's' : '') + ' removes ' + esc(watts(s.shedWatts)) + '.</p>'
         : '<p class="load-note dim">No breakers are shed in this scenario.</p>') +
+      /* Load behind a feed-through tap survives every shed list, because there
+       * is no handle to throw. Saying so beside the number is the difference
+       * between "shed more" and "you cannot shed this from here". */
+      (s.unsheddableWatts
+        ? '<p class="load-note untraced-warn">' + esc(watts(s.unsheddableWatts)) +
+        ' of that is behind ' + (s.subpanels.length > 1 ? 'feed-through taps' :
+          'the feed-through tap at ' + esc((s.subpanels[0].fedFrom || {}).deviceId)) +
+        ' and <strong>no breaker in this panel can remove it</strong>' +
+        (s.subpanels.length === 1
+          ? ' — the only disconnect is inside the ' + esc(s.subpanels[0].name) + ', ' +
+            esc(s.subpanels[0].location) + '.'
+          : '.') +
+        (s.unknownSubpanelAppliances.length
+          ? ' ' + s.unknownSubpanelAppliances.length + ' load' +
+            (s.unknownSubpanelAppliances.length > 1 ? 's' : '') +
+            ' down there has no draw recorded, so even that figure is a floor.'
+          : '') + '</p>'
+        : '') +
       (s.untracedDevices.length
         ? '<p class="load-note untraced-warn">Reads LOW: ' + s.untracedDevices.length +
         ' breaker' + (s.untracedDevices.length > 1 ? 's' : '') + ' still on (' +
@@ -829,6 +1058,9 @@
 
       var un = t.closest('[data-unmapped]');
       if (un) { showUnmapped(Number(un.getAttribute('data-unmapped'))); return; }
+
+      var subp = t.closest('[data-subpanel]');
+      if (subp) { showSubpanel(subp.getAttribute('data-subpanel')); return; }
 
       /* A circuit row carries both a device and a circuit index. */
       var row = t.closest('[data-circuit]');

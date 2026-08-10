@@ -17,9 +17,22 @@
       "name": "Ford F-150 Lightning",
       "shortName": "Lightning",
       "capacityKwh": 131,
-      "maxOutputWatts": 9600,
+      "maxOutputWatts": 7200,
       "location": "Panel B",
-      "connectionType": "30A outdoor receptacle"
+      "connectionType": "30A/240V outdoor receptacle",
+      "notes": "The ceiling is the RECEPTACLE, not the truck. 30A at 240V is 7.2 kW, whatever Pro Power Onboard is rated for in total. Corrected from 9600 W, which was the truck's figure and overstated what this connection can actually deliver."
+    }
+  },
+  "cables": {
+    "l1430-ext": {
+      "name": "L14-30 generator extension cord",
+      "shortName": "L14-30 cord",
+      "configuration": "NEMA L14-30 (30A, 125/250V, 3-pole 4-wire twist-lock)",
+      "ends": "Standard generator extension: MALE plug on one end, FEMALE connector on the other.",
+      "howItConnects": "The male plug goes into the source's L14-30 output (the F3800+ or the truck). The female connector twists onto the male pins of the inlet box at the panel. Ordinary cord, ordinary directions - nothing improvised.",
+      "verified": true,
+      "verificationMethod": "owner identification",
+      "notes": "One cable serves both panels. This is what closes the old male-to-male worry: the house side is a MALE inlet, so a normal cord fits, and there are no exposed live pins at either end."
     }
   },
   "equipment": {
@@ -95,13 +108,19 @@
           "Leviton LITLK Transfer Interlock Kit",
           "GenSafety LEV-200 (aftermarket)"
         ],
-        "receptacle": {
+        "cable": "l1430-ext",
+        "connection": {
           "location": "Wall, immediately left of Panel A (garage, interior)",
+          "deviceType": "flanged power inlet box - MALE pins, not a receptacle",
           "configuration": "NEMA L14-30 (30A, 125/250V, 3-pole 4-wire twist-lock)",
-          "gender": "female (receptacle, not a flanged inlet)",
-          "enclosure": "surface-mount metal single-gang box",
-          "confidence": "medium",
-          "notes": "VERIFY. The photo shows a female twist-lock face, which would require a male-to-male cord from the Anker's L14-30 output. Confirm whether this is actually a flanged power inlet before relying on this description."
+          "gender": "male",
+          "genderVerified": true,
+          "manufacturer": "Reliance Controls",
+          "model": "PBN30",
+          "modelConfidence": "medium",
+          "enclosure": "surface-mount inlet box",
+          "confidence": "high",
+          "notes": "RESOLVED. Earlier this was read off a photo as a female receptacle, which implied a male-to-male cord - it does not. It is a male flanged power inlet, so an ordinary L14-30 extension cord connects it to the Anker with no exposed live pins. The PBN30 model number is the owner's recollection and is the one part still worth confirming; the male gender is verified."
         },
         "confidence": "high",
         "notes": "Slots 2 and 4 are NOT a branch circuit - they are the backup feed. The interlock plate physically prevents the main and this breaker from both being ON."
@@ -114,7 +133,7 @@
       "slots": 30,
       "backupSource": "lightning",
       "location": "Garage",
-      "notes": "Secondary panel - can be powered by F-150 Lightning via outdoor 30A receptacle. 14 of 30 slots are empty - substantial room for smart-breaker or solar expansion.",
+      "notes": "Secondary panel - can be powered by the F-150 Lightning through the outdoor 30A/240V inlet, which caps it at 7.2 kW. 14 of 30 slots are empty, so there is real room for smart-breaker or solar expansion - but count on fewer than 14. Slots 5 and 7 sit opposite the feed-through lug at 6/8, and the 2/0 feeder conductors landing there most likely make that pair unusable. Check before planning around them.",
       "mainBreaker": {
         "manufacturer": "Leviton",
         "amps": 200,
@@ -136,14 +155,21 @@
         "breakerPoles": 2,
         "breakerCatalogNumber": "LB230-T",
         "interlockType": "mechanical sliding-plate interlock over the top two right-column positions",
-        "receptacle": {
+        "cable": "l1430-ext",
+        "connection": {
           "location": "Outdoors",
-          "configuration": "30A (exact NEMA configuration not yet confirmed)",
-          "confidence": "unverified",
-          "notes": "Not yet photographed. Confirm the configuration before the first real transfer."
+          "deviceType": "flanged power inlet box - MALE pins, not a receptacle",
+          "configuration": "NEMA L14-30 (30A, 125/250V, 3-pole 4-wire twist-lock)",
+          "gender": "male",
+          "genderVerified": true,
+          "manufacturer": "Reliance Controls",
+          "model": "PBN30",
+          "modelConfidence": "medium",
+          "confidence": "medium",
+          "notes": "Same arrangement as Panel A and the same cord fits both, so this is a male inlet - that much is verified by the owner. Still not photographed: the exact NEMA configuration is inferred from the PBN30 (L14-30) and from the fact that one cable serves both panels. Confirm on sight before the first real transfer."
         },
         "confidence": "high",
-        "notes": "Slots 2 and 4 are the backup feed, not a branch circuit. Confirmed from photo and the directory card ('GEN INPUT')."
+        "notes": "Slots 2 and 4 are the backup feed, not a branch circuit. Confirmed from photo and the directory card ('GEN INPUT').\nThe truck side is the Lightning's 240V 30A outlet, which is what caps this panel at 7.2 kW regardless of Pro Power Onboard's total rating. Confirm the truck-side outlet configuration when you confirm the inlet."
       },
       "emptySlots": [
         5,
@@ -190,6 +216,7 @@
       "labelSource": "single circuit",
       "circuitType": "240V appliance",
       "physicalMarking": "orange tape",
+      "physicalMarkingMeaning": "Orange tape marks a breaker to shut off during an outage.",
       "priority": null,
       "shedIn": [
         "truckHome",
@@ -209,7 +236,9 @@
           "verificationMethod": "breaker walk-through"
         }
       ],
-      "notes": [],
+      "notes": [
+        "The orange tape means 'shut this off in an outage'. Confirmed by the owner: the dryer is not needed on backup power."
+      ],
       "estimatedWattsTotal": 5000
     },
     {
@@ -237,7 +266,7 @@
       "label": "Basement \u2014 fridge, bath, ejector pump",
       "shortLabel": "Basement: fridge, bath, pump",
       "labelSource": "authored",
-      "circuitType": "probable MWBC (two 120V legs, shared neutral)",
+      "circuitType": "MWBC (two 120V legs sharing one neutral, one common-trip handle)",
       "physicalMarking": null,
       "priority": "critical",
       "shedIn": [],
@@ -287,7 +316,8 @@
         }
       ],
       "notes": [
-        "Circuits recorded on slot(s) [7] only. Both legs must be traced to confirm MWBC."
+        "CONFIRMED multi-wire branch circuit: two 120V legs sharing one neutral under one common-trip handle. Not a 240V load.",
+        "Endpoints are recorded on slot 7 only. The slot 5 leg is real but nothing on it has been traced yet - see A-unmapped."
       ],
       "estimatedWattsTotal": 1000
     },
@@ -480,7 +510,7 @@
       "label": "Bedrooms + office (internet) + full bath",
       "shortLabel": "Bedrooms, office (net), bath",
       "labelSource": "authored",
-      "circuitType": "probable MWBC (two 120V legs, shared neutral)",
+      "circuitType": "MWBC (two 120V legs sharing one neutral, one common-trip handle)",
       "physicalMarking": null,
       "priority": "critical",
       "shedIn": [],
@@ -565,7 +595,7 @@
         }
       ],
       "notes": [
-        "Circuits recorded on slot(s) [13, 15] only. Both legs must be traced to confirm MWBC."
+        "CONFIRMED multi-wire branch circuit: two 120V legs sharing one neutral under one common-trip handle. Not a 240V load. Both legs are traced."
       ],
       "estimatedWattsTotal": 700
     },
@@ -656,16 +686,37 @@
         "photoVerified": true
       },
       "role": "branch",
-      "label": "Unidentified (30A 2-pole)",
-      "shortLabel": "Unidentified",
-      "labelSource": "placeholder",
-      "circuitType": "unidentified 2-pole",
+      "label": "Water heater",
+      "labelSource": "owner identification",
+      "circuitType": "240V appliance",
       "physicalMarking": "orange tape",
+      "physicalMarkingMeaning": "Orange tape marks a breaker to shut off during an outage.",
       "priority": null,
-      "shedIn": [],
-      "circuits": [],
-      "notes": [],
-      "estimatedWattsTotal": 0
+      "shedIn": [
+        "truckHome",
+        "truckAway"
+      ],
+      "circuits": [
+        {
+          "room": "Unfinished Basement",
+          "endpoint": "Water heater",
+          "estimatedWatts": 4500,
+          "fedFromSlot": [
+            19,
+            21
+          ],
+          "voltage": "240V",
+          "notes": "4500 W is the usual single-element rating for a 30A 2-pole electric tank, not a nameplate reading. Elements are normally interlocked so only one runs at a time. Read the nameplate to confirm.",
+          "verified": true,
+          "verificationMethod": "owner identification"
+        }
+      ],
+      "notes": [
+        "Identified by the owner. This confirms the earlier hypothesis behind the orange tape: 30A 2-pole, in the unfinished basement, and exactly the kind of load you tape for shedding.",
+        "Location taken from the A-30 note ('on side with hot water heater'). Confirm the tank is on this circuit by killing 19/21 and checking for hot water.",
+        "Shed in BOTH scenarios. At roughly 4.5 kW it exceeds the Anker's entire 3.8 kW output on its own. A tank holds hot water for hours with the power off."
+      ],
+      "estimatedWattsTotal": 4500
     },
     {
       "id": "A-23-25",
@@ -689,9 +740,16 @@
         "photoVerified": true
       },
       "role": "branch",
-      "label": "Air Conditioner",
-      "labelSource": "single circuit",
+      "label": "Mini-split — mud room addition",
+      "shortLabel": "Mini-split (mud room)",
+      "labelSource": "owner identification",
       "circuitType": "240V appliance",
+      "equipment": {
+        "manufacturer": "Pioneer",
+        "model": "CYB012GMFILCAD-16",
+        "description": "12,000 BTU (1 ton) ductless mini-split, 22 SEER, 8-way cassette, heat pump, 230V",
+        "productUrl": "https://www.homedepot.com/p/Pioneer-12000-BTU-1-Ton-Ductless-Mini-Split-22-SEER-8-Way-Cassette-Air-Conditioner-with-Heat-Pump-230V-CYB012GMFILCAD-16/313980078"
+      },
       "physicalMarking": null,
       "priority": null,
       "shedIn": [
@@ -701,21 +759,23 @@
       "circuits": [
         {
           "room": "Mud Room",
-          "endpoint": "Air Conditioner",
-          "estimatedWatts": 3500,
+          "endpoint": "Mini-split cassette (heat and cool)",
+          "estimatedWatts": 1200,
           "fedFromSlot": [
             23,
             25
           ],
           "voltage": "240V",
+          "notes": "1200 W is an estimate for a 12k BTU 22 SEER inverter unit at full load, not a nameplate reading. Read the MCA and maximum fuse size off the outdoor unit to confirm.",
           "verified": true,
-          "verificationMethod": "breaker walk-through"
+          "verificationMethod": "owner identification"
         }
       ],
       "notes": [
-        "NEEDS VERIFICATION: recorded as 40A but the installed breaker is 20A 2-pole."
+        "Identified by the owner as a Pioneer 12k mini-split serving the mud room addition. This RESOLVES the old contradiction: the 3500 W figure was wrong, not the breaker. A 12k BTU inverter unit draws roughly 1 kW and sits comfortably on a 20A 2-pole.",
+        "It is a HEAT PUMP, so it heats as well as cools. It is shed by default in both scenarios, but at roughly 1.2 kW it is by far the cheapest heat in the house - worth bringing back if the load budget allows and the Panel B heat kit is locked out."
       ],
-      "estimatedWattsTotal": 3500
+      "estimatedWattsTotal": 1200
     },
     {
       "id": "A-27-29",
@@ -739,15 +799,36 @@
         "photoVerified": true
       },
       "role": "branch",
-      "label": "Unidentified (20A 2-pole)",
-      "shortLabel": "Unidentified",
-      "labelSource": "placeholder",
-      "circuitType": "unidentified 2-pole",
+      "label": "Surge protective device (Siemens)",
+      "shortLabel": "Surge protector (Siemens)",
+      "labelSource": "owner identification",
+      "circuitType": "240V device",
+      "equipment": {
+        "manufacturer": "Siemens",
+        "model": null,
+        "description": "Whole-house surge protective device. Model not recorded - read it off the unit."
+      },
       "physicalMarking": null,
       "priority": null,
       "shedIn": [],
-      "circuits": [],
-      "notes": [],
+      "circuits": [
+        {
+          "room": "Garage",
+          "endpoint": "Whole-house surge protective device",
+          "estimatedWatts": 0,
+          "fedFromSlot": [
+            27,
+            29
+          ],
+          "voltage": "240V",
+          "notes": "An SPD is not a load - it sits across the line and draws essentially nothing until it clamps. Recorded at 0 W deliberately, so this breaker reads as 'nothing to trace' rather than 'untraced'.",
+          "verified": true,
+          "verificationMethod": "owner identification"
+        }
+      ],
+      "notes": [
+        "Confirmed by the owner as the Siemens surge protector. Leave it ON: it costs nothing to run and it is protecting the house at exactly the moment the grid comes back."
+      ],
       "estimatedWattsTotal": 0
     },
     {
@@ -969,10 +1050,12 @@
       "label": "Kitchen counter plugs + dishwasher",
       "shortLabel": "Kitchen counter + dishwasher",
       "labelSource": "authored",
-      "circuitType": "probable MWBC (two 120V legs, shared neutral)",
+      "circuitType": "MWBC (two 120V legs sharing one neutral, one common-trip handle)",
       "physicalMarking": "orange tape",
+      "physicalMarkingMeaning": "Orange tape marks a breaker to shut off during an outage.",
       "priority": null,
       "shedIn": [
+        "truckHome",
         "truckAway"
       ],
       "circuits": [
@@ -995,7 +1078,9 @@
         }
       ],
       "notes": [
-        "Circuits recorded on slot(s) [10] only. Both legs must be traced to confirm MWBC."
+        "CONFIRMED multi-wire branch circuit: two 120V legs sharing one neutral under one common-trip handle. Not a 240V load.",
+        "Endpoints are recorded on slot 10 only. The slot 12 leg is real but nothing on it has been traced yet - see A-unmapped.",
+        "The orange tape means 'shut this off in an outage'. Confirmed by the owner: shed in BOTH scenarios, not just truck-away. The dishwasher alone is 1.8 kW."
       ],
       "estimatedWattsTotal": 3300
     },
@@ -1629,24 +1714,36 @@
       "poles": 2,
       "amps": null,
       "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LFTLA",
+        "deviceType": "Plug-on Feed Through Lug Accessory",
         "photoVerified": true,
-        "confidence": "low",
-        "notes": "Not a recognizable Leviton branch breaker. Black body, no visible branding, handle or amp rating."
+        "confidence": "high",
+        "notes": "Black body with no handle and no amp rating because it is not a breaker. It is a plug-on lug accessory that taps both busbars and hands the feeder straight through. The two heavy black conductors landing to its right are that feeder."
       },
-      "role": "branch",
-      "label": "UNIDENTIFIED DEVICE (directory says 'Furn')",
-      "shortLabel": "UNIDENTIFIED - 'Furn'?",
-      "labelSource": "panel directory - unverified",
-      "circuitType": "unknown",
+      "role": "feedThrough",
+      "feeds": "hvac-strips",
+      "overcurrentProtection": "none",
+      "protectedBy": "Panel B 200A main breaker only",
+      "label": "Feed-through lug tap — feeds the HVAC subpanel (NOT a breaker)",
+      "shortLabel": "Feed-through lug — HVAC sub",
+      "labelSource": "hardware",
+      "circuitType": "bus tap / feed-through lug",
       "physicalMarking": null,
       "priority": null,
       "shedIn": [],
       "circuits": [],
+      "monitoring": {
+        "smartBreakerMonitorable": false,
+        "reason": "Loads reaching the HVAC subpanel never pass through a Panel B branch breaker, so no LWHEM smart breaker can ever measure them.",
+        "instrumentationPath": "A CT pair on the 2/0 aluminum feeder is the only instrumentation path."
+      },
       "notes": [
-        "Occupies slots 6 and 8. Black-bodied, no visible Leviton branding, no visible ON/OFF handle from any supplied angle. Two heavy black conductors land immediately to its right.",
-        "Directory card reads 'Furn' for 6/8, which would fit the heat-pump air handler plus resistance heat strips - a load that would need a large 2-pole breaker.",
-        "ACTION: needs a straight-on or side photo to identify. Do not treat the amp rating as known.",
-        "WARNING: because no load is recorded, this device contributes 0 W to the Panel B load figure. If it is an air handler with resistance strips the real figure is far higher."
+        "THIS DEVICE CANNOT BE SWITCHED OFF. It has no handle and no overcurrent protection of its own. Everything downstream of it is protected only by Panel B's 200A main.",
+        "The handwritten directory card reads 'Furn' at 6/8. That label is WRONG and must not be carried forward - there is no furnace breaker here, and nothing at Panel B disconnects what this feeds.",
+        "It feeds the HVAC heat-strip subpanel at the air handler (2/0 aluminum, roughly 135A at 75C). The only disconnecting means for those loads is inside that subpanel.",
+        "Its downstream load (20 kW of electric heat) IS counted in the Panel B load figure, but it can never be shed at Panel B.",
+        "It probably explains the phantom 'Oven' the directory card lists at 5/7. Those slots face this lug, and the 2/0 feeder conductors landing here most likely make the pair unusable - so a breaker that was written on the card was never installed there. Treat 5/7 as doubtful when planning expansion."
       ],
       "estimatedWattsTotal": 0
     },
@@ -1672,20 +1769,24 @@
         "photoVerified": true
       },
       "role": "branch",
-      "label": "Air conditioner / heat pump condenser (per directory)",
-      "shortLabel": "A/C condenser (unconfirmed)",
-      "labelSource": "panel directory - unverified",
+      "label": "Heat pump outdoor unit (Bryant 284ANV060000, 5-ton)",
+      "shortLabel": "Heat pump outdoor unit (5-ton)",
+      "labelSource": "authored",
       "circuitType": "240V appliance",
+      "equipment": {
+        "manufacturer": "Bryant",
+        "model": "284ANV060000",
+        "description": "Evolution variable-speed heat pump, 5-ton, outdoor unit"
+      },
       "physicalMarking": null,
       "priority": null,
-      "shedIn": [
-        "truckHome"
-      ],
+      "shedIn": [],
       "circuits": [],
       "notes": [
-        "40A 2-pole confirmed from photo; the A/C attribution comes from the handwritten directory, not from the walkthrough.",
-        "Note there is also a 'Mud Room Air Conditioner' recorded on Panel A 23/25 (20A 2-pole). Either the house has two units, or one of these labels is wrong.",
-        "No load recorded, so this contributes 0 W to the Panel B load figure despite being a 40A circuit."
+        "This is the OUTDOOR half of the same system the HVAC subpanel serves. The indoor half is the FE4ANB006L00 fan coil and the KFCEH3301C20 electric heat kit, both behind the feed-through lug at 6/8.",
+        "DELIBERATELY NOT SHED. The Panel B outage procedure is heat-pump-only: lock the electric heat out at the Evolution Connex control and let the heat pump run. Shedding this breaker would turn off the one piece of heating that fits inside a 7.2 kW inlet.",
+        "40A 2-pole confirmed from photo. No load figure recorded, so it contributes 0 W to the Panel B load meter - see hvac-heat-pump-on-truck before assuming it fits.",
+        "A 'Mud Room Air Conditioner' is also recorded on Panel A 23/25 (20A 2-pole). That is a separate unit or a wrong label; this one is the main system."
       ],
       "estimatedWattsTotal": 0
     },
@@ -1711,8 +1812,8 @@
         "photoVerified": true
       },
       "role": "branch",
-      "label": "Double oven (probable)",
-      "labelSource": "panel directory - unverified",
+      "label": "Double oven",
+      "labelSource": "owner identification",
       "circuitType": "240V appliance",
       "physicalMarking": null,
       "priority": null,
@@ -1729,14 +1830,14 @@
             16
           ],
           "voltage": "240V",
-          "notes": "Moved here from slots 2/4, which are the generator inlet.",
-          "verified": false,
-          "verificationMethod": "breaker walk-through"
+          "notes": "5000 W is an estimate for a double wall oven on a 40A 2-pole, not a nameplate reading.",
+          "verified": true,
+          "verificationMethod": "owner identification"
         }
       ],
       "notes": [
-        "Directory reads 'OVEN' at 14/16. The walkthrough recorded the double oven as 'Panel B breaker 2', which cannot be right - 2/4 is the gen input.",
-        "The directory also reads 'Oven' at 5/7, but 5 and 7 are physically empty. Confirm which of these is the live oven circuit."
+        "CONFIRMED at 14/16 by the owner. This closes the old contradiction: the walkthrough had the oven on 'Panel B breaker 2', and following that would have shut off the generator inlet while leaving a 5 kW oven live behind it.",
+        "The directory card's other 'Oven' entry, at 5/7, is simply wrong - those slots are empty."
       ],
       "estimatedWattsTotal": 5000
     },
@@ -1888,18 +1989,30 @@
         "photoVerified": true
       },
       "role": "branch",
-      "label": "Unidentified (20A 1-pole)",
-      "shortLabel": "Unidentified",
-      "labelSource": "placeholder",
+      "label": "Anker F3800+ trickle-charge outlet",
+      "shortLabel": "Anker trickle-charge outlet",
+      "labelSource": "owner identification",
       "circuitType": "120V branch",
       "physicalMarking": null,
       "priority": null,
       "shedIn": [],
-      "circuits": [],
-      "notes": [
-        "Installed and not recorded anywhere - blank on the directory card and absent from the walkthrough. One of the best candidates for the unmapped outlets in unassignedEndpoints."
+      "circuits": [
+        {
+          "room": "Garage",
+          "endpoint": "Anker F3800+ trickle-charge plug",
+          "estimatedWatts": 1000,
+          "fedFromSlot": 26,
+          "notes": "A single dedicated plug. 1000 W is a placeholder: the F3800+ AC charge rate is set in the Anker app and can run from a couple of hundred watts to about 1800 W. Record the rate you actually use.",
+          "verified": true,
+          "verificationMethod": "owner identification"
+        }
       ],
-      "estimatedWattsTotal": 0
+      "notes": [
+        "This is the outlet the trickle-charge safety warning is about. Step 1 of the Panel A procedure is to unplug the Anker from it before connecting the Anker to Panel A.",
+        "WORTH KNOWING: the outlet is on PANEL B, but the Anker backs up PANEL A. So when the truck is powering Panel B, this plug is live from the truck - which makes it the no-extra-cable way to recharge the Anker mid-outage. The truck is then carrying both panels through the Anker, so watch the 7.2 kW ceiling.",
+        "Not shed in any scenario, precisely so that recharge path stays available. If you are not using it, unplug the Anker rather than switching the breaker."
+      ],
+      "estimatedWattsTotal": 1000
     },
     {
       "id": "B-28-30",
@@ -1923,19 +2036,152 @@
         "photoVerified": true
       },
       "role": "branch",
-      "label": "Surge protective device (probable)",
-      "shortLabel": "Surge protector (probable)",
-      "labelSource": "panel directory - unverified",
+      "label": "Surge protective device (Siemens)",
+      "shortLabel": "Surge protector (Siemens)",
+      "labelSource": "owner identification",
       "circuitType": "240V device",
+      "equipment": {
+        "manufacturer": "Siemens",
+        "model": null,
+        "description": "Whole-house surge protective device. Model not recorded - read it off the unit."
+      },
       "physicalMarking": null,
       "priority": null,
       "shedIn": [],
-      "circuits": [],
+      "circuits": [
+        {
+          "room": "Garage",
+          "endpoint": "Whole-house surge protective device",
+          "estimatedWatts": 0,
+          "fedFromSlot": [
+            28,
+            30
+          ],
+          "voltage": "240V",
+          "notes": "An SPD is not a load - it sits across the line and draws essentially nothing until it clamps. Recorded at 0 W deliberately, so this breaker reads as 'nothing to trace' rather than 'untraced'.",
+          "verified": true,
+          "verificationMethod": "owner identification"
+        }
+      ],
       "notes": [
-        "Directory reads 'Surge' at slot 28. A 2-pole 20A feed matches a whole-house SPD.",
-        "A device with a green status LED is visible mounted below the panel in the overview photo - likely the SPD this feeds."
+        "Confirmed by the owner as the Siemens surge protector, matching the directory's 'Surge' at slot 28 and the device with a green status LED visible below the panel in the overview photo.",
+        "Leave it ON: it costs nothing to run and it is protecting the house at exactly the moment the grid comes back."
       ],
       "estimatedWattsTotal": 0
+    }
+  ],
+  "subpanels": [
+    {
+      "id": "hvac-strips",
+      "name": "HVAC heat-strip subpanel",
+      "shortName": "HVAC subpanel",
+      "location": "At the HVAC air handler",
+      "locationDetail": "Mounted on the air handler itself, NOT in the garage with panels A and B. A sweep of Panel B does not go anywhere near it.",
+      "fedFrom": {
+        "panel": "B",
+        "deviceId": "B-6-8"
+      },
+      "enclosure": {
+        "manufacturer": "unknown - not Leviton",
+        "description": "older grey load center",
+        "photoVerified": false,
+        "confidence": "medium"
+      },
+      "mainBreaker": null,
+      "disconnectArrangement": "No main breaker. Three 50A 2-pole handles, a six-disconnect arrangement - those handles ARE the disconnecting means for everything here.",
+      "feeder": {
+        "conductor": "2/0 aluminum",
+        "material": "aluminum",
+        "size": "2/0",
+        "ampacityAmps": 135,
+        "ampacityBasis": "75C column",
+        "overcurrentProtection": "none at the tap",
+        "protectedBy": "Panel B 200A main breaker only",
+        "verified": true,
+        "notes": "Confirmed aluminum, 2/0 - the copper-vs-aluminium question is settled. Whether the run satisfies the NEC 10-ft tap rule is NOT settled: it needs a measured run length and confirmation of whether it is in raceway. No code conclusion has been recorded either way."
+      },
+      "monitoring": {
+        "smartBreakerMonitorable": false,
+        "reason": "Loads here never pass through a Panel B branch breaker, so no Leviton LWHEM smart breaker can ever measure them. Swapping breakers in Panel B will not instrument this branch, no matter how many are swapped.",
+        "instrumentationPath": "A CT pair on the 2/0 aluminum feeder is the only way to meter this."
+      },
+      "devices": [
+        {
+          "id": "HVAC-A",
+          "position": null,
+          "poles": 2,
+          "amps": 50,
+          "label": "Heat kit circuit A",
+          "serves": [
+            "heat-kit"
+          ],
+          "verified": true,
+          "notes": [
+            "Physical position in the subpanel was not recorded, so these are listed A/B/C rather than by slot number. Identify them at the panel before switching anything.",
+            "May ALSO feed the FE4ANB006L00 fan coil blower - unverified. See hvac-blower-circuit."
+          ]
+        },
+        {
+          "id": "HVAC-B",
+          "position": null,
+          "poles": 2,
+          "amps": 50,
+          "label": "Heat kit circuit B",
+          "serves": [
+            "heat-kit"
+          ],
+          "verified": true,
+          "notes": [
+            "May ALSO feed the FE4ANB006L00 fan coil blower - unverified. See hvac-blower-circuit."
+          ]
+        },
+        {
+          "id": "HVAC-C",
+          "position": null,
+          "poles": 2,
+          "amps": 50,
+          "label": "Heat kit circuit C",
+          "serves": [
+            "heat-kit"
+          ],
+          "verified": true,
+          "notes": [
+            "May ALSO feed the FE4ANB006L00 fan coil blower - unverified. See hvac-blower-circuit.",
+            "Whether the heat kit is wired for two or three field power circuits is itself unverified - see hvac-heat-kit-circuits. If it is two, one of these three handles feeds something else."
+          ]
+        }
+      ],
+      "appliances": [
+        {
+          "id": "heat-kit",
+          "room": "HVAC Air Handler",
+          "endpoint": "Electric heat kit",
+          "manufacturer": "Bryant",
+          "model": "KFCEH3301C20",
+          "estimatedWatts": 20000,
+          "rating": "20 kW @ 240V, ~83A, 62,800 BTU/hr, internal circuit breakers",
+          "fieldPowerCircuits": 3,
+          "fieldPowerCircuitsVerified": false,
+          "verified": true,
+          "notes": "ONE heat kit, not three. The three 50A 2-pole breakers are the field power circuits of a single 20 kW appliance - roughly 6,667 W per circuit. Never sum them as three 20 kW loads."
+        },
+        {
+          "id": "blower",
+          "room": "HVAC Air Handler",
+          "endpoint": "Fan coil blower",
+          "manufacturer": "Bryant",
+          "model": "FE4ANB006L00",
+          "estimatedWatts": null,
+          "verified": false,
+          "notes": "Likely fed from one of the three subpanel circuits, but which one is unknown and even the fact that it is fed from here is unconfirmed. No draw figure recorded, so it contributes nothing to the total below."
+        }
+      ],
+      "estimatedWattsTotal": 20000,
+      "notes": [
+        "Nothing in Panel B can disconnect these loads. The feed-through lug at Panel B 6/8 has no handle, so the only disconnecting means is the three 50A handles inside this subpanel, at the air handler.",
+        "20 kW of connected electric heat against a 7.2 kW inlet is roughly 2.8x the ceiling. The heat strips must be locked out at the Evolution Connex control before any transfer.",
+        "DO NOT switch off all three handles as a blanket move: the blower is probably on one of them, and killing the blower leaves the heat pump unable to run at all."
+      ]
     }
   ],
   "scenarios": {
@@ -1947,7 +2193,7 @@
         "A",
         "B"
       ],
-      "notes": "Both panels can be energized. Panel A is still limited by the Anker's 3800 W output, so the Panel A shed list applies. Panel B now has a real shed list (cooktop, A/C, oven), but three Panel B breakers have no loads traced - see the open question panel-b-load-understated before trusting the Panel B figure."
+      "notes": "Both panels can be energized. Panel A is still limited by the Anker's 3800 W output, so the Panel A shed list applies. Panel B is limited by the 30A/240V outdoor receptacle - 7.2 kW, not the truck's 9.6 kW - and 20 kW of electric heat sits behind a feed-through lug that NO Panel B breaker can switch off. Lock the heat strips out at the Evolution Connex control and run heat-pump-only; the Panel B shed list (cooktop, oven) does not touch them."
     },
     "truckAway": {
       "name": "Conservation Mode",
@@ -1956,160 +2202,130 @@
       "panelsAvailable": [
         "A"
       ],
-      "notes": "Only 3.8 kWh available. Prioritize refrigerators, sump pump, ejector pump and internet. Avoid washer, dishwasher and high-draw appliances. Note A-10-12 is common trip: shedding it also kills slot 12."
+      "notes": "Only 3.8 kWh available. Prioritize refrigerators, sump pump, ejector pump and internet. Avoid washer, dishwasher and high-draw appliances. The three orange-taped breakers (1/3 dryer, 10/12 kitchen + dishwasher, 19/21 water heater) are the shed list the tape was marking. Note A-10-12 is common trip: shedding it also kills slot 12."
     }
   },
   "openQuestions": [
     {
-      "id": "B-2-4-oven",
-      "panel": "B",
-      "deviceIds": [
-        "B-2-4",
-        "B-14-16"
-      ],
-      "recorded": "50A 2-pole double oven at Panel B slots 2/4",
-      "observed": "30A 2-pole generator inlet under a mechanical interlock plate",
-      "severity": "high",
-      "resolution": "SAFETY-RELEVANT, NOW FIXED. The previous Panel B walkthrough told the operator to shut off 2/4 as the 'double oven' - 2/4 is the inlet breaker, and the real oven would have stayed energized behind a 30A feed. The oven is reassigned to 14/16 pending confirmation. The directory also reads 'Oven' at 5/7, but 5 and 7 are physically empty; confirm which is the live oven circuit."
-    },
-    {
-      "id": "B-6-8-unknown",
+      "id": "hvac-blower-circuit",
       "panel": "B",
       "deviceIds": [
         "B-6-8"
       ],
-      "recorded": "Nothing recorded",
-      "observed": "An installed black 2-pole-width device with no visible branding, handle or amp rating",
+      "subpanelId": "hvac-strips",
+      "recorded": "Three 50A 2-pole breakers in the HVAC subpanel, all treated as heat-strip circuits",
+      "observed": "One of the three likely also feeds the FE4ANB006L00 fan coil blower",
       "severity": "high",
-      "resolution": "Photograph straight-on to identify. Directory says 'Furn', which would fit a heat-pump air handler with resistance heat strips. Until identified its amp rating is unknown, it is in no shed list, and it contributes 0 W to the Panel B load figure - so that figure is optimistic by an unknown and potentially large margin."
+      "resolution": "SAFETY-RELEVANT. Until this is identified, do NOT switch off all three subpanel handles: killing the blower leaves the heat pump unable to run, so the outage move that was supposed to save power removes your heat entirely. Identify the blower circuit, then the procedure becomes 'switch off only the two strip-only handles'. Until then, lock heat out at the Evolution Connex control instead."
+    },
+    {
+      "id": "hvac-feeder-tap-rule",
+      "panel": "B",
+      "deviceIds": [
+        "B-6-8"
+      ],
+      "subpanelId": "hvac-strips",
+      "recorded": "2/0 aluminum feeder, roughly 135A at 75C, tapped off the Panel B bus with no overcurrent device",
+      "observed": "Conductor material and size confirmed; run length and raceway status unknown",
+      "severity": "high",
+      "resolution": "The copper-vs-aluminium question is RESOLVED: it is 2/0 aluminum. What is not resolved is whether this unfused tap satisfies the NEC 10-ft tap rule - that needs a measured run length and confirmation of whether the run is in raceway. No code conclusion has been recorded either way, and none should be quoted from this file until it is measured. Everything downstream is protected only by the Panel B 200A main."
+    },
+    {
+      "id": "hvac-heat-kit-circuits",
+      "panel": "B",
+      "deviceIds": [
+        "B-6-8"
+      ],
+      "subpanelId": "hvac-strips",
+      "recorded": "Three 50A 2-pole breakers serving one KFCEH3301C20 heat kit",
+      "observed": "The kit may be wired for two field power circuits rather than three",
+      "severity": "medium",
+      "resolution": "Confirm the number of field power circuits from the kit's wiring diagram. If it is two, the third 50A handle feeds something that is currently unaccounted for. The 20 kW total does not change either way - it is one appliance, roughly 6,667 W per circuit across three, and must never be summed as three 20 kW loads."
+    },
+    {
+      "id": "hvac-heat-pump-on-truck",
+      "panel": "B",
+      "deviceIds": [
+        "B-10-12"
+      ],
+      "recorded": "Panel B outage plan is heat-pump-only on a 7.2 kW inlet",
+      "observed": "No running-watt or starting-draw figure is recorded for the 5-ton 284ANV060000",
+      "severity": "medium",
+      "resolution": "Heat-pump-only is the right plan - 20 kW of strips against 7.2 kW is not a plan at all - but nobody has checked that the heat pump itself fits. Record the unit's running watts and locked-rotor draw from the nameplate. A variable-speed Evolution unit should soft-start, but that is an assumption, not a measurement. B-10-12 is deliberately NOT on the shed list because of this plan; if the figures come back too high, that decision has to be revisited."
     },
     {
       "id": "panel-b-load-understated",
       "panel": "B",
       "deviceIds": [
-        "B-6-8",
-        "B-10-12",
-        "B-28-30"
-      ],
-      "recorded": "Panel B connected load computes from recorded circuits only",
-      "observed": "Three Panel B devices totalling 100A of breaker capacity have no circuits recorded",
-      "severity": "high",
-      "resolution": "The Panel B load meter reads far lower than reality. B-6-8 (unknown, 'Furn'), B-10-12 (40A A/C) and B-28-30 (20A surge) all contribute 0 W. Do not trust the Panel B figure until these are traced. The Panel A figure is sound."
-    },
-    {
-      "id": "A-23-25-ac",
-      "panel": "A",
-      "deviceIds": [
-        "A-23-25",
-        "A-19-21"
-      ],
-      "recorded": "40A 2-pole, Mud Room Air Conditioner, 3500W",
-      "observed": "20A 2-pole",
-      "severity": "high",
-      "resolution": "VERIFY BEFORE RELYING ON THIS. Either the AC is not on 23/25, or it is a much smaller unit than 3500W. A 3500W condenser would not run on a 20A 2-pole."
-    },
-    {
-      "id": "A-inlet-receptacle",
-      "panel": "A",
-      "deviceIds": [
-        "A-2-4"
-      ],
-      "recorded": "Not previously represented",
-      "observed": "Female L14-30 twist-lock face on the wall left of Panel A",
-      "severity": "high",
-      "resolution": "VERIFY. A female receptacle would require a male-to-male cord from the Anker's L14-30 output, which is neither safe nor code-compliant. Confirm whether this is actually a flanged power inlet (male pins) before the first real transfer."
-    },
-    {
-      "id": "A-19-21-identity",
-      "panel": "A",
-      "deviceIds": [
-        "A-19-21"
-      ],
-      "recorded": "20A 2-pole, unknown",
-      "observed": "30A 2-pole, orange tape, no circuits mapped",
-      "severity": "medium",
-      "resolution": "HYPOTHESIS: the 80-gallon electric water heater. It is in the unfinished basement (see the A-30 circuit note), a resistance tank that size is normally 30A 2-pole, and a water heater is exactly what you would tape for load shedding. Test by killing 19/21 and checking for hot water."
-    },
-    {
-      "id": "ac-count",
-      "panel": "both",
-      "deviceIds": [
-        "A-23-25",
         "B-10-12"
       ],
-      "recorded": "'Mud Room Air Conditioner' on Panel A 23/25",
-      "observed": "A 23/25 is a 20A 2-pole; B 10/12 is a 40A 2-pole the directory calls A/C",
+      "recorded": "Panel B connected load computes from recorded circuits only",
+      "observed": "The 40A heat pump outdoor unit still has no load figure recorded",
       "severity": "medium",
-      "resolution": "Determine whether there are two cooling units. B 10/12 fits a main heat pump condenser. A 23/25 at 20A would fit a mini-split or small unit."
+      "resolution": "Nearly closed. The 20 kW HVAC heat kit behind the 6/8 feed-through lug is now counted, B-26 is the Anker trickle-charge plug, and B-28-30 is an SPD that genuinely draws nothing. The only real gap left is B-10-12, the 5-ton heat pump outdoor unit - and it is the one thing the outage plan intends to RUN, so its figure matters. See hvac-heat-pump-on-truck."
     },
     {
-      "id": "A-mwbc-overlap",
-      "panel": "A",
+      "id": "B-inlet-unphotographed",
+      "panel": "B",
       "deviceIds": [
-        "A-5-7",
-        "A-10-12",
-        "A-13-15"
+        "B-2-4"
       ],
-      "recorded": "120V circuits on slots 7, 10, 13 and 15, which are also halves of 2-pole breakers",
-      "observed": "Slots 5/7, 10/12 and 13/15 each carry a single 2-pole device",
-      "severity": "medium",
-      "resolution": "Most likely multi-wire branch circuits: two 120V legs sharing a neutral under a common-trip 2-pole handle. A 1974 house would commonly do this for kitchen counter circuits (10/12 fits the counter + dishwasher entries) and for bedroom/lighting runs. If so these are not 240V loads at all. Confirm by checking for a shared neutral at the panel."
+      "recorded": "Male L14-30 flanged inlet, Reliance Controls PBN30, same as Panel A",
+      "observed": "Never photographed; the description is carried over from Panel A and from the fact that one cord serves both",
+      "severity": "low",
+      "resolution": "The gender is verified by the owner - it is a male inlet, so the male-to-male worry is gone here too. What is still inferred rather than seen is the exact NEMA configuration and the model. Photograph it, and confirm the truck-side outlet configuration at the same time."
     },
     {
       "id": "A-unmapped",
       "panel": "A",
       "deviceIds": [
-        "A-19-21",
-        "A-23-25",
-        "A-27-29",
-        "A-5-7"
+        "A-5-7",
+        "A-10-12"
       ],
-      "recorded": "No circuits recorded",
-      "observed": "Breakers installed with no endpoints traced",
-      "severity": "medium",
-      "resolution": "Still fully unidentified in Panel A: 19/21 (30A), 27/29 (20A). A-23-25 has a load recorded but the amperage contradicts it. A-5-7 has circuits on slot 7 only - the other leg is untraced."
-    },
-    {
-      "id": "B-26-unknown",
-      "panel": "B",
-      "deviceIds": [
-        "B-26"
-      ],
-      "recorded": "Nothing recorded",
-      "observed": "20A 1-pole installed",
-      "severity": "medium",
-      "resolution": "Unmapped 120V circuit - blank on the directory card and absent from the walkthrough. Test it against the four entries in unassignedEndpoints."
+      "recorded": "Endpoints recorded on one leg of two confirmed MWBCs",
+      "observed": "A-5-7 has endpoints on slot 7 only; A-10-12 on slot 10 only",
+      "severity": "low",
+      "resolution": "Every Panel A breaker now has an identity, and the MWBCs are confirmed. What is left is that each of these two handles has a second 120V leg with nothing recorded on it. Turning the handle off still kills both legs - that part is not in doubt - but there are outlets somewhere fed from slots 5 and 12 that nobody has followed. The four entries in unassignedEndpoints are the obvious candidates."
     },
     {
       "id": "directory-cards-stale",
       "panel": "both",
       "deviceIds": [],
       "recorded": "Handwritten directory cards in both panels",
-      "observed": "The Panel B card lists an oven at 5/7 (physically empty), a washer at 11 (the walkthrough puts it on A-9), and has no entry for slot 26",
+      "observed": "The Panel B card lists an oven at 5/7 (empty slots - the real oven is at 14/16), a washer at 11 (the walkthrough puts it on A-9), 'Furn' at 6/8 (which is a feed-through lug, not a furnace breaker), and has no entry for slot 26 (the Anker trickle-charge plug)",
       "severity": "medium",
-      "resolution": "Treat this file as authoritative and the cards as historical. Both cards should be reprinted from this data."
+      "resolution": "Every entry on the card is now accounted for, so this is purely a reprint job. The 'Furn' label at 6/8 is the dangerous one: it implies a handle that can turn the heating off, and there is no handle there at all. Both cards should be reprinted from this data - `npm run insert`."
     },
     {
-      "id": "A-orange-tape",
+      "id": "panel-a-nameplates",
       "panel": "A",
       "deviceIds": [
-        "A-1-3",
-        "A-10-12",
-        "A-19-21"
+        "A-19-21",
+        "A-23-25"
       ],
-      "recorded": "Not represented",
-      "observed": "Orange tape on three breakers: 1/3 (30A), 10/12 (20A), 19/21 (30A)",
-      "severity": "info",
-      "resolution": "Meaning of the tape is unknown. It may already encode a shed list or a verification pass. Note all three are high-draw or suspected high-draw circuits, which supports the shed-list reading."
+      "recorded": "Water heater at 4500 W, mini-split at 1200 W",
+      "observed": "Both figures are class estimates, not nameplate readings",
+      "severity": "low",
+      "resolution": "Both devices are now correctly identified, but neither number came off a label. Read the water heater's element rating from the tank and the mini-split's MCA and maximum fuse size from the outdoor unit. Both are shed in every scenario, so the remaining-load figure does not move either way - this only affects how much shedding them buys you."
     }
   ],
   "safetyWarnings": [
     {
       "id": "trickle-charge",
       "title": "Disconnect Trickle Charger",
-      "message": "BEFORE starting: Unplug the Anker F3800+ from its 120V trickle charge outlet.",
+      "message": "BEFORE starting: Unplug the Anker F3800+ from its 120V trickle charge outlet. That outlet is the dedicated plug on Panel B slot 26, not a Panel A circuit.",
       "panels": [
         "A"
+      ],
+      "severity": "critical",
+      "showInWalkthrough": true
+    },
+    {
+      "id": "heat-strips-not-on-panel-b",
+      "title": "No Panel B Breaker Turns Off the Heat Strips",
+      "message": "20 kW of electric heat is fed through a lug at Panel B 6/8 - a bus tap with no handle. Switching off every breaker in Panel B leaves it live. Lock electric heat out at the Bryant Evolution Connex control (SYSTXBBECC01-B) and run heat-pump-only. The only physical disconnect is the three 50A handles inside the subpanel at the HVAC air handler.",
+      "panels": [
+        "B"
       ],
       "severity": "critical",
       "showInWalkthrough": true
@@ -2165,7 +2381,7 @@
       {
         "step": 4,
         "title": "Connect Anker to Panel",
-        "instruction": "Connect the Anker F3800+ output cable to the generator inlet on the wall immediately left of Panel A.",
+        "instruction": "Use the L14-30 extension cord. Its MALE plug goes into the Anker F3800+ L14-30 output; its FEMALE end twists onto the inlet box on the wall immediately left of Panel A. The inlet has male pins, so the cord only fits one way round.",
         "image": "images/panel-a/step4-connect-anker.jpg",
         "icon": "connect"
       },
@@ -2201,36 +2417,52 @@
       },
       {
         "step": 2,
+        "title": "Lock Out Electric Heat at the Thermostat",
+        "instruction": "At the Bryant Evolution Connex control (SYSTXBBECC01-B), lock out auxiliary / emergency electric heat so the system runs heat-pump-only. Do this FIRST - it is the only way to keep 20 kW of heat strips from calling for power.",
+        "warning": "No breaker in Panel B can disconnect the heat strips. They are fed through a lug at slots 6/8 that has no handle. The thermostat lockout is your primary control.",
+        "icon": "power-on"
+      },
+      {
+        "step": 3,
         "title": "Turn Off High-Draw Breakers",
         "instruction": "At Panel B, turn OFF these breakers:",
         "breakersToTurnOff": "scenario-dependent",
         "image": "images/panel-b/step2-breakers-off.jpg",
         "icon": "breaker-off",
-        "warning": "CORRECTED: an earlier version listed slots 2/4 here as the double oven. 2/4 is the GENERATOR INLET and must stay available - do not switch it off."
+        "warning": "Do NOT switch off the heat pump outdoor unit at 10/12 - heat-pump-only is the plan, and that is the breaker feeding it. Slots 2/4 are the GENERATOR INLET, not the double oven; leave them available. Slots 6/8 are a feed-through lug with no handle; there is nothing there to switch."
       },
       {
-        "step": 3,
+        "step": 4,
+        "title": "Physical Backstop: Kill the Strip-Only Circuits",
+        "instruction": "Go to the HVAC subpanel mounted at the air handler - NOT in the garage with Panels A and B. It is an older grey load center with three 50A 2-pole breakers and no main. Once you know which of the three feeds the blower, switch off ONLY the other two.",
+        "warning": "Do not switch off all three. The fan coil blower is probably on one of them, and without the blower the heat pump cannot run either. Until the blower circuit is identified (see hvac-blower-circuit), rely on the thermostat lockout from step 2 and leave these alone.",
+        "icon": "breaker-off"
+      },
+      {
+        "step": 5,
         "title": "Turn Off Main Breaker",
         "instruction": "Flip the MAIN breaker at Panel B to the OFF position.",
         "image": "images/panel-b/step3-main-off.jpg",
         "icon": "main-off"
       },
       {
-        "step": 4,
-        "title": "Connect Truck to Receptacle",
-        "instruction": "Using the truck's bed-mounted 30A power outlet, connect to the outdoor receptacle with the appropriate cable.",
+        "step": 6,
+        "title": "Connect Truck to the Inlet",
+        "instruction": "Same L14-30 extension cord as Panel A. Its MALE plug goes into the truck's bed-mounted 240V 30A outlet; its FEMALE end twists onto the outdoor inlet box.",
+        "warning": "The outdoor inlet has not been photographed yet. It should be the same male L14-30 inlet as Panel A - check it fits before you need it to.",
         "image": "images/panel-b/step4-connect-truck.jpg",
         "icon": "connect"
       },
       {
-        "step": 5,
+        "step": 7,
         "title": "Enable Pro Power Onboard",
         "instruction": "In the truck, enable Pro Power Onboard and select the appropriate output level.",
+        "warning": "The 30A/240V receptacle caps this at 7.2 kW no matter what the truck can deliver.",
         "image": "images/panel-b/step5-pro-power-onboard.jpg",
         "icon": "power-on"
       },
       {
-        "step": 6,
+        "step": 8,
         "title": "Engage Generator Inlet Breaker",
         "instruction": "Flip the generator inlet breaker at Panel B to ON.",
         "warning": "Slots 2/4, top of the right column, under the interlock plate. The outdoor receptacle configuration is not yet confirmed - check it before the first real transfer.",
@@ -2238,9 +2470,9 @@
         "icon": "breaker-on"
       },
       {
-        "step": 7,
+        "step": 9,
         "title": "Verify Panel B Loads",
-        "instruction": "Check that Panel B circuits are receiving power.",
+        "instruction": "Check that Panel B circuits are receiving power, and watch the truck's output. If it trips or sags, electric heat is the first thing to suspect - confirm the Connex lockout held.",
         "image": "images/panel-b/step7-verify-loads.jpg",
         "icon": "verify"
       }
@@ -2255,13 +2487,14 @@
       {
         "step": 2,
         "title": "Connect Charging Cable",
-        "instruction": "Connect a charging cable from one of the truck's outlets to the Anker's AC input.",
+        "instruction": "Connect a charging cable from one of the truck's outlets to the Anker's AC input. If Panel B is already energized from the truck, the Anker's usual trickle-charge plug (Panel B slot 26) is live and does the same job with no extra cable.",
         "icon": "connect"
       },
       {
         "step": 3,
         "title": "Monitor Charging",
         "instruction": "The Anker can charge while also providing backup power (pass-through charging).",
+        "warning": "The truck is now carrying Panel B AND, through the Anker, Panel A. Everything still has to fit inside the 7.2 kW receptacle ceiling.",
         "icon": "charging"
       }
     ]
@@ -2272,9 +2505,29 @@
     "Bedroom on Right": "Jordan's Room"
   },
   "metadata": {
-    "lastUpdated": "2026-08-07",
-    "notes": "Device-first schema. One entry per physical breaker; circuits nest underneath. Shed lists live on devices via shedIn so common-trip behaviour is explicit and there is one source of truth. Handwritten panel directory cards are historical, not authoritative.",
+    "lastUpdated": "2026-08-10",
+    "notes": "Device-first schema. One entry per physical breaker; circuits nest underneath. Shed lists live on devices via shedIn so common-trip behaviour is explicit and there is one source of truth. Not every device is a breaker: role 'feedThrough' is a bus tap with no overcurrent protection, and what it feeds lives in subpanels[]. Handwritten panel directory cards are historical, not authoritative.",
     "changelog": [
+      {
+        "version": "2.6",
+        "date": "2026-08-10",
+        "summary": "Two more findings closed by owner confirmation. A-mwbc-overlap resolved: slots 5/7, 10/12 and 13/15 in Panel A are genuinely multi-wire branch circuits - two 120V legs sharing a neutral under one common-trip handle, not 240V loads - so circuitType drops 'probable'. What survives from that finding is narrower and now lives in A-unmapped: A-5-7 and A-10-12 each have a second leg (slots 5 and 12) with no endpoints recorded. B-2-4-oven resolved: the double oven is confirmed at 14/16, and the directory card's second 'Oven' at 5/7 is simply wrong. Likely cause recorded on B-6-8 - slots 5/7 face the feed-through lug and the 2/0 feeder conductors probably make that pair unusable, which also means Panel B has fewer than 14 genuinely available slots for expansion."
+      },
+      {
+        "version": "2.5",
+        "date": "2026-08-10",
+        "summary": "Both generator inlets verified by the owner as MALE flanged power inlets (Reliance Controls PBN30, model per recollection), connected with an ordinary L14-30 generator extension cord. This resolves A-inlet-receptacle, the high-severity worry that the Panel A inlet was a female receptacle needing a male-to-male cord - the photo was misread. Renamed generatorInlet.receptacle to generatorInlet.connection, because calling a male inlet a 'receptacle' is what caused the misreading in the first place. Added a top-level cables{} keyed like backupSources, referenced by generatorInlet.cable, so the one cord is described once and both panels point at it. Connection steps in both walkthroughs now say which end goes where. What remains open is only that the Panel B inlet has never been photographed (B-inlet-unphotographed, low)."
+      },
+      {
+        "version": "2.4",
+        "date": "2026-08-10",
+        "summary": "Owner identification closed out every unidentified breaker in Panel A and both in Panel B. A-19-21 is the water heater (4500W, shed in both scenarios), A-23-25 is a Pioneer CYB012GMFILCAD-16 12k mini-split in the mud room addition (1200W, not the recorded 3500W - the breaker was right and the figure was wrong), A-27-29 and B-28-30 are both Siemens whole-house SPDs, B-26 is the dedicated plug that trickle-charges the Anker F3800+. The orange tape is confirmed to mean 'shut this off in an outage', so A-10-12 joins A-1-3 and A-19-21 in being shed in BOTH scenarios rather than only truck-away. SPDs carry an explicit 0W circuit so they read as 'nothing to trace' instead of inflating the untraced-capacity warning. Noted that the Anker's charge outlet is on Panel B, which makes it the no-extra-cable recharge path when the truck is on Panel B. Resolved: A-19-21-identity, A-23-25-ac, ac-count, B-26-unknown, A-orange-tape."
+      },
+      {
+        "version": "2.3",
+        "date": "2026-08-10",
+        "summary": "Panel B 6/8 reclassified: it is a Leviton LFTLA plug-on feed-through lug, not a breaker, and the directory's 'Furn' label is wrong. New role 'feedThrough' (no handle, no ampacity, no overcurrent protection) and a new top-level subpanels[] holding the HVAC heat-strip subpanel at the air handler: 2/0 aluminum feeder, three 50A 2-pole breakers, one 20 kW Bryant KFCEH3301C20 heat kit (NOT three). That 20 kW now counts toward Panel B's connected load and is marked unsheddable, because no Panel B breaker can disconnect it. Lightning inlet corrected 9600W -> 7200W (the 30A/240V receptacle is the ceiling, not the truck). B-10-12 identified as the Bryant 284ANV060000 5-ton heat pump outdoor unit and REMOVED from the truckHome shed list, because the outage plan is heat-pump-only with strips locked out at the Evolution Connex control. Panel B walkthrough gained a thermostat-lockout step and a subpanel backstop step. Resolved: B-6-8-unknown (identified), and the feeder's copper-vs-aluminium question (2/0 aluminum, confirmed)."
+      },
       {
         "version": "2.2",
         "date": "2026-08-07",

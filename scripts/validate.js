@@ -82,14 +82,22 @@ function checkHome(data, file) {
     ['id', 'panel', 'slots', 'poles', 'role', 'label'].forEach(function (f) {
       if (d[f] === undefined || d[f] === null) err(w + " — missing '" + f + "'");
     });
-    /* amps may be null: an installed device whose rating we cannot read yet.
-     * The key must still be present so the omission is deliberate. */
+    /* amps may be null: an installed device whose rating we cannot read yet,
+     * or a feed-through lug that has no rating to read. The key must still be
+     * present so the omission is deliberate. */
     if (!('amps' in d)) {
       err(w + " — missing 'amps' (use null if the rating is genuinely unknown)");
     } else if (d.amps === null) {
-      warn(w + ' — amps is null; rating unknown, so this device is absent from all load math');
+      /* For a feed-through this is definitional, not a gap, so don't nag. */
+      if (d.role !== Model.ROLE_FEEDTHROUGH) {
+        warn(w + ' — amps is null; rating unknown, so this device is absent from all load math');
+      }
     } else if (typeof d.amps !== 'number') {
       err(w + ' — amps must be a number or null');
+    }
+    if (d.role === Model.ROLE_FEEDTHROUGH && typeof d.amps === 'number') {
+      err(w + ' — a feedThrough has no overcurrent protection, so amps must be null. ' +
+        'Giving it a rating would imply a handle that can trip.');
     }
 
     if (d.id) {
@@ -97,7 +105,8 @@ function checkHome(data, file) {
       else seenIds[d.id] = true;
     }
 
-    if (d.role !== Model.ROLE_BRANCH && d.role !== Model.ROLE_INLET) {
+    if (d.role !== Model.ROLE_BRANCH && d.role !== Model.ROLE_INLET &&
+      d.role !== Model.ROLE_FEEDTHROUGH) {
       err(w + " — unknown role '" + d.role + "'");
     }
 
@@ -157,6 +166,25 @@ function checkHome(data, file) {
       if ((d.shedIn || []).length) err(w + ' — a generatorInlet must not have shedIn entries');
     }
 
+    /* A feed-through lug has no handle. Putting it in a shed list would tell
+     * someone to switch off something they physically cannot, and hanging
+     * circuits directly on it would hide the fact that the real disconnect is
+     * in a different enclosure. Its loads belong to the subpanel it feeds. */
+    if (d.role === Model.ROLE_FEEDTHROUGH) {
+      if ((d.circuits || []).length) {
+        err(w + ' — a feedThrough must not carry circuits directly; put them on the ' +
+          'subpanel it feeds, so the disconnect location stays visible');
+      }
+      if ((d.shedIn || []).length) {
+        err(w + ' — a feedThrough has no handle and cannot be shed');
+      }
+      if (!d.feeds) {
+        err(w + " — a feedThrough must name what it feeds via 'feeds'");
+      } else if (!Model.subpanelById(data, d.feeds)) {
+        err(w + " — feeds '" + d.feeds + "' is not a known subpanel");
+      }
+    }
+
     /* ----------------------------------------------------------- circuits */
 
     var sum = 0;
@@ -212,6 +240,15 @@ function checkHome(data, file) {
       warn(w + ' — installed but no circuits traced' +
         (d.amps ? ' (' + d.amps + 'A of capacity)' : '') +
         '; contributes 0 W to the panel load figure');
+    }
+
+    /* A product URL gets rendered as a real anchor, so it must be a plain
+     * https link — never a javascript: or data: URI smuggled in through data. */
+    if (d.equipment && d.equipment.productUrl !== undefined && d.equipment.productUrl !== null) {
+      if (typeof d.equipment.productUrl !== 'string' ||
+        d.equipment.productUrl.indexOf('https://') !== 0) {
+        err(w + ' — equipment.productUrl must be an https:// URL (it is rendered as a link)');
+      }
     }
 
     if (d.shortLabel !== undefined && typeof d.shortLabel !== 'string') {
@@ -285,6 +322,172 @@ function checkHome(data, file) {
     } else {
       warn(where + ' — panel ' + p + ' generatorInlet has no deviceId yet (not surveyed)');
     }
+
+    if (inlet.cable && !(data.cables || {})[inlet.cable]) {
+      err(where + ' — panel ' + p + " generatorInlet.cable '" + inlet.cable +
+        "' is not a known cable");
+    }
+
+    /* The gender of the house-side connector decides whether an ordinary cord
+     * works or whether someone has to improvise one with exposed live pins.
+     * It is the single most safety-relevant fact about an inlet, so an
+     * unrecorded gender is a gap worth naming. */
+    var conn = inlet.connection;
+    if (!conn) {
+      warn(where + ' — panel ' + p + ' generatorInlet has no connection block; ' +
+        'nobody can tell what plugs into it');
+    } else {
+      if (!conn.gender) {
+        warn(where + ' — panel ' + p + ' inlet connection has no gender recorded. ' +
+          'Male (a flanged inlet) takes an ordinary cord; female would mean an ' +
+          'improvised male-to-male one. Say which.');
+      } else if (conn.gender === 'female') {
+        warn(where + ' — panel ' + p + ' inlet connection is recorded FEMALE, which ' +
+          'would require a male-to-male cord. Confirm this is really not a flanged inlet.');
+      }
+      if (conn.gender && conn.genderVerified !== true) {
+        warn(where + ' — panel ' + p + ' inlet gender is recorded but not marked verified');
+      }
+    }
+  });
+
+  /* ------------------------------------------------------------- cables */
+
+  Object.keys(data.cables || {}).forEach(function (k) {
+    var c = data.cables[k];
+    var cw = where + ' :: cable ' + k;
+    ['name', 'configuration', 'ends'].forEach(function (f) {
+      if (!c[f]) err(cw + " — missing '" + f + "'");
+    });
+    var usedBy = Object.keys(panels).filter(function (p) {
+      return ((panels[p].generatorInlet || {}).cable) === k;
+    });
+    if (!usedBy.length) warn(cw + ' — no panel inlet references this cable');
+  });
+
+  /* ------------------------------------------------------------ subpanels */
+
+  /* A subpanel is everything downstream of a feed-through tap. The rules that
+   * matter here all guard one mistake: making its load look like something a
+   * breaker in the parent panel can switch off, or counting one appliance once
+   * per breaker that feeds it. */
+  (data.subpanels || []).forEach(function (sp, si) {
+    var sw = where + ' :: subpanel ' + (sp.id || '#' + si);
+
+    ['id', 'name', 'location', 'fedFrom'].forEach(function (f) {
+      if (!sp[f]) err(sw + " — missing '" + f + "'");
+    });
+    if (sp.id && seenIds[sp.id]) {
+      err(sw + ' — subpanel id collides with a device id');
+    }
+
+    var from = sp.fedFrom || {};
+    if (from.panel && !panels[from.panel]) {
+      err(sw + " — fedFrom.panel '" + from.panel + "' is not a known panel");
+    }
+    if (!from.deviceId) {
+      err(sw + ' — fedFrom.deviceId is required; a subpanel must say what feeds it');
+    } else {
+      var feeder = (data.devices || []).filter(function (d) { return d.id === from.deviceId; })[0];
+      if (!feeder) {
+        err(sw + " — fedFrom.deviceId '" + from.deviceId + "' is not a known device");
+      } else {
+        if (feeder.panel !== from.panel) {
+          err(sw + ' — fedFrom says panel ' + from.panel + ' but ' + feeder.id +
+            ' is in panel ' + feeder.panel);
+        }
+        if (feeder.feeds !== sp.id) {
+          err(sw + ' — ' + feeder.id + " does not point back at this subpanel (its feeds is " +
+            JSON.stringify(feeder.feeds) + ')');
+        }
+        if (feeder.role === Model.ROLE_BRANCH && !sp.mainBreaker) {
+          warn(sw + ' — fed from a branch breaker but has no mainBreaker recorded; ' +
+            'confirm where its disconnect actually is');
+        }
+      }
+    }
+
+    /* Appliance totals. The heat-kit case is the whole reason this is a rule:
+     * three 50A handles feeding ONE 20 kW kit is 20 kW, and summing per
+     * breaker would put 60 kW on the panel meter. Watts live on appliances,
+     * never on the subpanel's breakers. */
+    var applianceIds = Object.create(null);
+    var appSum = 0;
+    var unknownWatts = 0;
+    (sp.appliances || []).forEach(function (a, ai) {
+      var aw = sw + ' appliance ' + (a.id || '#' + ai);
+      ['id', 'room', 'endpoint'].forEach(function (f) {
+        if (!a[f]) err(aw + " — missing '" + f + "'");
+      });
+      if (a.id) {
+        if (applianceIds[a.id]) err(aw + ' — duplicate appliance id');
+        applianceIds[a.id] = false; /* flips true when a device claims it */
+      }
+      if (!('estimatedWatts' in a)) {
+        err(aw + " — missing 'estimatedWatts' (use null if genuinely unknown)");
+      } else if (a.estimatedWatts === null) {
+        unknownWatts++;
+        warn(aw + ' — no draw recorded, so it contributes 0 W and the subpanel total reads low');
+      } else if (typeof a.estimatedWatts !== 'number') {
+        err(aw + ' — estimatedWatts must be a number or null');
+      } else {
+        appSum += a.estimatedWatts;
+      }
+      if ('verified' in a && typeof a.verified !== 'boolean') {
+        err(aw + ' — verified must be true or false');
+      }
+      if (a.verified === false) {
+        warn(aw + ' — recorded but not confirmed; the app shows it as a guess');
+      }
+    });
+
+    if (typeof sp.estimatedWattsTotal !== 'number') {
+      err(sw + ' — estimatedWattsTotal must be a number');
+    } else if (sp.estimatedWattsTotal !== appSum) {
+      err(sw + ' — estimatedWattsTotal is ' + sp.estimatedWattsTotal +
+        ' but its appliances sum to ' + appSum +
+        ' (appliances carry the watts, never the breakers that feed them)');
+    }
+
+    /* Subpanel breakers. They must not carry watts of their own — that is the
+     * double-count this schema exists to prevent. */
+    var subDeviceIds = Object.create(null);
+    (sp.devices || []).forEach(function (d, di) {
+      var dw = sw + ' :: ' + (d.id || 'device #' + di);
+      if (!d.id) err(dw + " — missing 'id'");
+      else if (subDeviceIds[d.id] || seenIds[d.id]) {
+        err(dw + ' — device id is not unique across the home');
+      } else subDeviceIds[d.id] = true;
+
+      if (!d.label) err(dw + " — missing 'label'");
+      if (!('amps' in d)) err(dw + " — missing 'amps' (use null if unknown)");
+      if ('estimatedWatts' in d || 'estimatedWattsTotal' in d) {
+        err(dw + ' — subpanel breakers must not carry watts; put the load on the ' +
+          'appliance they serve, or one appliance gets counted once per breaker');
+      }
+      (d.serves || []).forEach(function (aid) {
+        if (!(aid in applianceIds)) {
+          err(dw + " — serves '" + aid + "', which is not an appliance of this subpanel");
+        } else {
+          applianceIds[aid] = true;
+        }
+      });
+      if (!(d.serves || []).length) {
+        warn(dw + ' — serves nothing; the breaker is recorded but its load is not');
+      }
+    });
+
+    Object.keys(applianceIds).forEach(function (aid) {
+      if (!applianceIds[aid]) {
+        warn(sw + " — appliance '" + aid + "' is not claimed by any subpanel breaker; " +
+          'which one feeds it is unrecorded');
+      }
+    });
+
+    if (!sp.mainBreaker && !sp.disconnectArrangement) {
+      warn(sw + ' — no mainBreaker and no disconnectArrangement; a reader cannot tell ' +
+        'how to kill power to it');
+    }
   });
 
   /* ----------------------------------------------------- shed list sanity */
@@ -296,7 +499,11 @@ function checkHome(data, file) {
       if (sum.over) {
         warn(where + ' — scenario ' + k + ' / panel ' + p + ': ' + sum.remainingWatts +
           'W of connected load remains against a ' + sum.sourceWatts + 'W source (over by ' +
-          sum.overBy + 'W). Not necessarily wrong, but the shed list may be incomplete.');
+          sum.overBy + 'W). Not necessarily wrong, but the shed list may be incomplete.' +
+          (sum.unsheddableWatts
+            ? ' ' + sum.unsheddableWatts + 'W of that is behind a feed-through tap and ' +
+              'cannot be shed at this panel at all.'
+            : ''));
       }
     });
   });
@@ -310,6 +517,10 @@ function checkHome(data, file) {
         err(where + " — openQuestion '" + q.id + "' references unknown device '" + id + "'");
       }
     });
+    if (q.subpanelId && !Model.subpanelById(data, q.subpanelId)) {
+      err(where + " — openQuestion '" + q.id + "' references unknown subpanel '" +
+        q.subpanelId + "'");
+    }
   });
 
   /* ----------------------------------------------------- safety warnings */

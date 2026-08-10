@@ -122,13 +122,48 @@ showing up in search. The two views disagreed about what the panel contained.
 **Anything that reasons about "what happens when I flip this" must reason in
 devices, never in slots.**
 
+### Not every device is a breaker
+
+`role: "feedThrough"` is a bus tap — Panel B 6/8 is a Leviton LFTLA plug-on
+feed-through lug. It occupies two breaker positions and has **no handle, no
+ampacity and no overcurrent protection**. Rules the validator enforces:
+`amps` must be `null`, no `circuits`, no `shedIn`, and `feeds` must name an
+entry in `subpanels[]` that points back at it.
+
+Everything it feeds lives in that subpanel object, not in `circuits`, because
+the disconnect is in a *different enclosure* and burying the loads on the tap
+would hide that. The handwritten card labelled these slots "Furn", which reads
+as a handle you can throw during an outage. There is no handle. The app draws
+the cell dashed with "NO HANDLE", the printed card prints
+`NOTHING TO SWITCH — FEEDS …`, and both are asserted in tests.
+
+### Subpanels
+
+`subpanels[]` holds everything downstream of such a tap. The rule that matters:
+**watts live on `appliances`, never on the subpanel's `devices`.** The HVAC
+subpanel has three 50A 2-pole breakers feeding *one* 20 kW Bryant KFCEH3301C20
+heat kit — roughly 6,667 W per circuit. Summing per breaker would put 60 kW on
+the meter. `estimatedWattsTotal` must equal the appliance sum, and the
+validator rejects any `estimatedWatts` on a subpanel breaker.
+
+`loadSummary()` adds subpanel load to the parent panel **and to `remaining`
+unconditionally**, reporting it as `unsheddableWatts`. It survives every shed
+list by construction, so "shed more" is the wrong instruction — "you cannot
+shed this from here, the disconnect is at the air handler" is the right one.
+The UI, the load meter and the door card all say that.
+
+`monitoring.smartBreakerMonitorable: false` records the other consequence:
+loads reaching a subpanel through a lug never pass a Panel B branch breaker,
+so no LWHEM smart breaker can ever meter them. A CT pair on the feeder is the
+only instrumentation path.
+
 ### Fields with non-obvious rules
 
 | Field | Rule |
 |---|---|
 | `poles` | Must equal `slots.length`. Validated. |
 | `slots` (2-pole) | Two same-parity slots two apart — odd = left column, even = right. `[1,2]` is physically impossible and is a validation error. |
-| `role` | Only `branch` is a load. `generatorInlet` is the backup feed: excluded from search and all load math, drawn green in the grid. |
+| `role` | Only `branch` is a load. `generatorInlet` is the backup feed: excluded from search and all load math, drawn green in the grid. `feedThrough` is a bus tap with no handle — see above. |
 | `shedIn` | **The single source of truth for shed lists.** Scenarios derive theirs from it. There is deliberately no `scenarios.shedDevices` — the old file had both plus pre-rendered labels, three copies of one fact. |
 | `estimatedWattsTotal` | Must equal the sum of its circuits' `estimatedWatts`. Validated. |
 | `fedFromSlot` | Number for one leg of an MWBC, array for a true 240V load. Must be one of the device's own slots. Validated. |
@@ -148,17 +183,26 @@ and compares it to the source's `maxOutputWatts`. Nothing here measures anything
 and it does not predict simultaneous draw. The UI says so explicitly; keep that
 caveat if you touch the wording.
 
-It is currently honest and alarming: after the Panel A shed list, ~10.7 kW of
-connected load remains against the Anker's 3.8 kW output. That is expected for a
-whole-panel transfer and is exactly why the shed list matters.
+It is currently honest and alarming: after the Panel A shed list, ~11.2 kW of
+connected load remains against the Anker's 3.8 kW output (~10.7 kW in
+truck-away, which sheds more). That is expected for a whole-panel transfer and
+is exactly why the shed list matters.
+
+Panel B is worse and for a different reason: ~22.8 kW against a **7.2 kW**
+ceiling, of which 20 kW is the HVAC heat kit behind the feed-through tap and
+**cannot be shed at the panel at all**. The Panel B ceiling is the 30A/240V
+outdoor receptacle, not the truck — 7.2 kW, not the F-150's 9.6 kW. The plan is
+to lock electric heat out at the Bryant Evolution Connex control
+(SYSTXBBECC01-B) and run heat-pump-only, which is why B-10-12 (the 5-ton
+outdoor unit) is deliberately **not** on the shed list.
 
 **The figure can also read LOW, which is the dangerous direction.** An installed
 breaker with no circuits traced contributes 0 W. `loadSummary()` returns
 `untracedDevices` / `untracedAmps` and the meter says "Reads LOW: N breakers still
-on…" so the gap is visible. Panel B is the live example — B-6-8 (unidentified,
-directory says "Furn"), B-10-12 (40A A/C) and B-28-30 (20A surge) have no loads
-recorded, so **the Panel B number is not currently trustworthy.** The Panel A
-number is sound.
+on…" so the gap is visible. Only B-10-12 (the 40A heat pump outdoor unit) is
+still in that state — and it is the one thing the outage plan intends to *run*,
+so its figure matters. Panel A is now fully traced and its meter no longer
+carries the warning.
 
 `capacityKwh` (stored energy, how *long*) and `maxOutputWatts` (output ceiling,
 how *much at once*) are different things. The meter uses watts. There is no
@@ -235,19 +279,47 @@ app whose entire purpose is working without one.
 - Update `metadata.lastUpdated` in the data file — the home view shows it so a
   reader knows how fresh their offline copy is.
 
-## State of the data (as of 2026-08-07)
+## State of the data (as of 2026-08-10)
 
 Honest inventory, because the app's credibility depends on it:
 
-- **Panel A** is photo-verified for hardware. Four 2-pole breakers still have no
-  circuits traced: 19/21 (30A), 23/25 (20A), 27/29 (20A), and 5/7 has one leg only.
-- **Panel B has never been photographed.** Seven devices carried forward from
-  notes; 23 of 30 slots unaccounted for; main breaker, inlet slots, interlock
-  type and receptacle configuration all unknown. `slotsSurveyed: false`.
-- **Two high-severity open questions** worth resolving before a real transfer:
-  the AC recorded at 3500 W sits on a 20A 2-pole that could not carry it, and the
-  Panel A inlet appears to be a *female* L14-30 receptacle, which would imply a
-  male-to-male cord. Both are in `openQuestions` and badged in the UI.
+- **Panel A** is photo-verified for hardware and every breaker now has an
+  identity. 19/21 is the water heater, 23/25 the mud-room mini-split (Pioneer
+  12k), 27/29 the Siemens SPD. The MWBCs at 5/7, 10/12 and 13/15 are **confirmed**
+  shared-neutral pairs, not 240V loads. What's left is that 5/7 and 10/12 each
+  have a second leg (slots 5 and 12) with no endpoints recorded. No untraced
+  capacity remains, so the Panel A meter no longer reads low.
+- **Panel B** is photo-reconciled (16 occupied, 14 empty), but its inlet has
+  never been photographed. Slots 6/8 are a feed-through lug, not a breaker, and
+  the 20 kW behind it is the panel's dominant load. Only 10/12 (the heat pump)
+  still has no load figure. **Fewer than 14 slots are actually available** — 5/7
+  face the lug and the 2/0 feeder conductors probably make that pair unusable,
+  which is also the likely reason the directory card lists a phantom oven there.
+- **The orange tape means "shut this off in an outage."** Confirmed by the
+  owner, recorded per device in `physicalMarkingMeaning`, and true of all three
+  taped breakers (1/3 dryer, 10/12 kitchen + dishwasher, 19/21 water heater).
+  `test/e2e.js` asserts the tape and `shedIn` cannot drift apart — if they do,
+  the physical panel and the app give different instructions.
+- **A surge protector carries an explicit 0 W circuit**, not an empty one, so it
+  reads as "nothing to trace" rather than inflating the untraced-capacity
+  warning. Empty `circuits` means nobody looked; 0 W means there is nothing to
+  find.
+- **The Anker charges from Panel B (slot 26) but backs up Panel A.** That is why
+  B-26 is deliberately not shed: when the truck is on Panel B, that plug is the
+  no-extra-cable way to recharge the Anker mid-outage.
+- **Both inlets are MALE flanged inlets** (Reliance Controls PBN30 per the
+  owner), connected with an ordinary L14-30 extension cord. This killed the
+  male-to-male worry — the photo had been misread. The key is
+  `generatorInlet.connection`, deliberately *not* `receptacle`, because calling
+  a male inlet a receptacle is what caused the misreading. The cord is described
+  once in top-level `cables{}` and referenced by `generatorInlet.cable`.
+  `validate.js` warns if any inlet gender is missing, unverified, or female.
+- **High-severity open questions** worth resolving before a real transfer: which
+  HVAC subpanel circuit feeds the blower (until that is known, do **not** switch
+  all three off — the heat pump needs the blower), and whether the unfused 2/0
+  aluminum tap satisfies the NEC 10-ft tap rule (needs a measured run length and
+  raceway status — **no code conclusion is recorded, and none should be quoted
+  from this file**). Both are in `openQuestions`.
 - `images/panel-b/step1-unplug-anker.jpg` is a stray copy from the old repo — it
   matches no step and is not cached. Delete or rename it once you know what it is.
 - Only 1 of 14 walkthrough photos exists. The rest render a placeholder; the

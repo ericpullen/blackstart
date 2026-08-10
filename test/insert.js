@@ -141,6 +141,48 @@ Object.keys(docs).forEach(function (p) {
       doc.querySelector('td.inlet').querySelectorAll('b.off').length, 0);
   }
 
+  /* A feed-through lug is not a breaker. On paper that has to be unmistakable:
+   * the handwritten card it replaces said "Furn" at these very slots, which
+   * reads as a handle you can throw. There is no handle. */
+  var taps = devices.filter(function (d) { return d.role === Model.ROLE_FEEDTHROUGH; });
+  check(w + 'feed-through cells are marked', doc.querySelectorAll('td.tap').length, taps.length);
+  taps.forEach(function (d) {
+    var cell = doc.querySelector('td.tap');
+    check(w + d.id + ' prints NO HANDLE instead of an amp rating',
+      /NO HANDLE/.test(cell.textContent), true);
+    check(w + d.id + ' never prints an amp rating', /\d+A/.test(cell.textContent), false);
+    check(w + d.id + ' carries no shed marker', cell.querySelectorAll('b.off').length, 0);
+
+    var sp = Model.subpanelById(DATA, d.feeds);
+    check(w + d.id + ' names the subpanel it feeds', raw.indexOf(sp.name) >= 0, true);
+    /* The back of the card must say where the disconnect actually is, or a
+     * reader sweeping this panel concludes they have switched everything off. */
+    check(w + 'the card says where the real disconnect is',
+      raw.indexOf(sp.location) >= 0, true);
+    check(w + 'the card has a "cannot switch these off here" block',
+      doc.querySelectorAll('.tap-block').length, function (n) { return n > 0; });
+    var shedNames = [].map.call(doc.querySelectorAll('.shed-l li'), function (e) {
+      return e.textContent;
+    }).join(' | ');
+    check(w + d.id + ' is absent from every shed list',
+      shedNames.indexOf(d.shortLabel || d.label) >= 0, false);
+
+    /* The subpanel's own breakers must never appear in the numbered shed list.
+     * Under a "turn these off first" heading that reads as an instruction to
+     * throw all of them — and killing all three kills the blower, which takes
+     * the heat pump down with it. */
+    (sp.devices || []).forEach(function (sd) {
+      check(w + 'subpanel breaker ' + sd.id + ' is not printed as a shed step',
+        shedNames.indexOf(sd.label) >= 0, false);
+    });
+    check(w + 'the tap block warns against switching them all off',
+      /do not/i.test(doc.querySelector('.tap-block').textContent), true);
+  });
+  if (!taps.length) {
+    check(w + 'no tap block when the panel has no feed-through',
+      doc.querySelectorAll('.tap-block').length, 0);
+  }
+
   /* Declared-empty vs unaccounted must stay distinguishable on paper too. */
   var declared = (panel.emptySlots || []).length;
   check(w + 'declared-empty slots say "empty"',
@@ -184,6 +226,20 @@ Object.keys(docs).forEach(function (p) {
         block.querySelectorAll('.shed-l li').length, shed.length);
     }
   });
+
+  /* The card has to say which end of the cord goes where — a printed
+   * procedure that stops at "connect the cable" is not a procedure. */
+  var conn = (panel.generatorInlet || {}).connection;
+  if (conn) {
+    var connBox = doc.querySelector('.conn');
+    check(w + 'the card describes the inlet', !!connBox, true);
+    if (connBox) {
+      check(w + 'the card gives the NEMA configuration',
+        connBox.textContent.indexOf(conn.configuration) >= 0, true);
+      check(w + 'the card says which cord end is which',
+        /male/i.test(connBox.textContent) && /female/i.test(connBox.textContent), true);
+    }
+  }
 
   /* Provenance: a card with no date can't be identified as stale. */
   check(w + 'card is stamped with the data date',

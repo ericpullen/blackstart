@@ -17,9 +17,17 @@
 
   var SCHEMA_VERSION = 2;
 
-  /* Roles a device can play. Only `branch` is a load. */
+  /* Roles a device can play. Only `branch` is a load.
+   *
+   * `feedThrough` is NOT a breaker. It is a bus tap — a plug-on lug accessory
+   * that occupies breaker positions but has no handle, no ampacity of its own
+   * and no overcurrent protection. Everything downstream of it is protected
+   * only by the panel main. It cannot be switched off, so it can never appear
+   * in a shed list, and its downstream load is charged to the panel as
+   * UNSHEDDABLE. What it feeds lives in data.subpanels, linked by `feeds`. */
   var ROLE_BRANCH = 'branch';
   var ROLE_INLET = 'generatorInlet';
+  var ROLE_FEEDTHROUGH = 'feedThrough';
 
   /* ---------------------------------------------------------------- indexing */
 
@@ -50,6 +58,52 @@
 
   function isLoad(device) {
     return device.role === ROLE_BRANCH;
+  }
+
+  function isFeedThrough(device) {
+    return device.role === ROLE_FEEDTHROUGH;
+  }
+
+  /* ---------------------------------------------------------------- subpanels */
+
+  /* A subpanel hangs off a device in a parent panel — here, off a feed-through
+   * lug with no handle. Its loads are real load on the parent panel but cannot
+   * be shed there, so they are tracked separately and added back in
+   * loadSummary rather than being folded into a device's circuits. */
+  function subpanels(data) {
+    return data.subpanels || [];
+  }
+
+  function subpanelById(data, id) {
+    return subpanels(data).filter(function (s) { return s.id === id; })[0] || null;
+  }
+
+  function subpanelsFedFrom(data, panel) {
+    return subpanels(data).filter(function (s) {
+      return ((s.fedFrom || {}).panel) === panel;
+    });
+  }
+
+  /* The subpanel fed by a given device, or null. */
+  function subpanelOfDevice(data, device) {
+    if (!device || !device.feeds) return null;
+    return subpanelById(data, device.feeds);
+  }
+
+  /* Connected load below a subpanel. Read from estimatedWattsTotal, which the
+   * validator pins to the sum of the APPLIANCES — never to the sum of the
+   * breakers. Three 50A handles feeding one 20 kW heat kit is 20 kW, not 60. */
+  function subpanelWatts(subpanel) {
+    return (subpanel && subpanel.estimatedWattsTotal) || 0;
+  }
+
+  /* Appliances with no recorded draw contribute nothing, exactly like an
+   * untraced breaker — so say how many there are instead of quietly rounding
+   * the total down to something reassuring. */
+  function subpanelUnknownAppliances(subpanel) {
+    return ((subpanel || {}).appliances || []).filter(function (a) {
+      return a.estimatedWatts === null || a.estimatedWatts === undefined;
+    });
   }
 
   /* ------------------------------------------------------- slot reconciliation */
@@ -166,7 +220,51 @@
       if (!isLoad(d)) return;
       out = out.concat(circuitsOf(data, d));
     });
-    return out.concat(unmappedCircuits(data));
+    return out.concat(subpanelCircuits(data)).concat(unmappedCircuits(data));
+  }
+
+  /* Appliances behind a subpanel are searchable like anything else. Someone
+   * typing "heat" during an outage has to be able to find the 20 kW heat kit
+   * and learn that no breaker in the garage switches it off. */
+  function subpanelCircuits(data) {
+    var out = [];
+    subpanels(data).forEach(function (sp) {
+      var feed = ((data.devices || []).filter(function (d) {
+        return d.id === (sp.fedFrom || {}).deviceId;
+      })[0]) || null;
+
+      (sp.appliances || []).forEach(function (a, i) {
+        out.push({
+          deviceId: null,
+          subpanelId: sp.id,
+          applianceIndex: i,
+          circuitIndex: i,
+          panel: (sp.fedFrom || {}).panel || null,
+          amps: null,
+          poles: null,
+          slots: [],
+          slotLabel: feed ? slotLabel(feed) : '?',
+          deviceLabel: sp.name,
+          circuitType: 'subpanel load (no breaker in the parent panel)',
+          physicalMarking: null,
+          hardware: {},
+          room: a.room,
+          displayRoom: displayRoom(data, a.room),
+          endpoint: a.endpoint,
+          estimatedWatts: a.estimatedWatts === undefined ? null : a.estimatedWatts,
+          fedFromSlot: null,
+          voltage: a.voltage || '240V',
+          notes: a.notes || null,
+          priority: a.priority || null,
+          verified: a.verified === undefined ? null : a.verified,
+          verificationMethod: a.verificationMethod || null,
+          model: a.model || null,
+          unmapped: false,
+          unsheddable: true
+        });
+      });
+    });
+    return out;
   }
 
   function unmappedCircuits(data) {
@@ -214,7 +312,9 @@
       circuit.slotLabel,
       circuit.physicalMarking || '',
       circuit.hardware.catalogNumber || '',
-      circuit.unmapped ? 'unknown unmapped untraced not traced' : ''
+      circuit.model || '',
+      circuit.unmapped ? 'unknown unmapped untraced not traced' : '',
+      circuit.unsheddable ? 'subpanel no breaker cannot be switched off' : ''
     ].join(' ').toLowerCase();
   }
 
@@ -261,9 +361,22 @@
       return shedIds.indexOf(d.id) < 0;
     });
 
-    var connectedWatts = sumWatts(loads);
+    /* Load that hangs off a feed-through tap is real load on this panel, but
+     * no breaker here can remove it. It survives every shed list by
+     * construction, so it goes into `remaining` unconditionally — and it is
+     * reported separately, because "you cannot turn this off from here" is a
+     * different instruction from "turn this off". */
+    var subs = subpanelsFedFrom(data, panel);
+    var unsheddableWatts = subs.reduce(function (n, s) {
+      return n + subpanelWatts(s);
+    }, 0);
+    var unknownSubAppliances = subs.reduce(function (list, s) {
+      return list.concat(subpanelUnknownAppliances(s));
+    }, []);
+
+    var connectedWatts = sumWatts(loads) + unsheddableWatts;
     var shedWatts = sumWatts(shed);
-    var remainingWatts = sumWatts(remaining);
+    var remainingWatts = sumWatts(remaining) + unsheddableWatts;
     var sourceWatts = source.maxOutputWatts || 0;
 
     /* Breakers that are installed but have no circuits traced contribute 0 W,
@@ -293,6 +406,9 @@
       shedWatts: shedWatts,
       remainingWatts: remainingWatts,
       shedDevices: shed,
+      subpanels: subs,
+      unsheddableWatts: unsheddableWatts,
+      unknownSubpanelAppliances: unknownSubAppliances,
       over: sourceWatts > 0 && remainingWatts > sourceWatts,
       overBy: Math.max(0, remainingWatts - sourceWatts),
       /* 0..1 for a meter; clamped so a 3x overage still renders */
@@ -330,9 +446,18 @@
     SCHEMA_VERSION: SCHEMA_VERSION,
     ROLE_BRANCH: ROLE_BRANCH,
     ROLE_INLET: ROLE_INLET,
+    ROLE_FEEDTHROUGH: ROLE_FEEDTHROUGH,
     index: index,
     devicesIn: devicesIn,
     isLoad: isLoad,
+    isFeedThrough: isFeedThrough,
+    subpanels: subpanels,
+    subpanelById: subpanelById,
+    subpanelsFedFrom: subpanelsFedFrom,
+    subpanelOfDevice: subpanelOfDevice,
+    subpanelWatts: subpanelWatts,
+    subpanelUnknownAppliances: subpanelUnknownAppliances,
+    subpanelCircuits: subpanelCircuits,
     slotState: slotState,
     surveyStatus: surveyStatus,
     unmappedCircuits: unmappedCircuits,

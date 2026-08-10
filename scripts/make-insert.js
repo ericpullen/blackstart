@@ -87,7 +87,8 @@ function amps(device) {
 var MARK = {
   critical: '●',   /* ● keep this on if you can */
   unconfirmed: '?',     /* data not confirmed at the panel */
-  untraced: '—'    /* — installed, nothing traced */
+  untraced: '—',   /* — installed, nothing traced */
+  feedThrough: '⇥' /* ⇥ no handle: a tap feeding another enclosure */
 };
 
 /* One-letter tags for the shed columns. Derived from the last word of each
@@ -169,8 +170,12 @@ function renderCard(data, panelKey, opt, report) {
       return ''; /* covered by the rowspan above */
     }
 
+    var feedThrough = Model.isFeedThrough(d);
+    var sub = feedThrough ? Model.subpanelOfDevice(data, d) : null;
+
     var cls = ['c'];
     if (d.role === Model.ROLE_INLET) cls.push('inlet');
+    if (feedThrough) cls.push('tap');
     if (d.priority === 'critical') cls.push('crit');
     var untraced = Model.isLoad(d) && (!d.circuits || !d.circuits.length);
     if (untraced) cls.push('untraced');
@@ -178,6 +183,7 @@ function renderCard(data, panelKey, opt, report) {
     var marks = [];
     if (d.priority === 'critical') marks.push(MARK.critical);
     if (untraced) marks.push(MARK.untraced);
+    if (feedThrough) marks.push(MARK.feedThrough);
     if (hasUnconfirmed(d)) marks.push(MARK.unconfirmed);
 
     var sheds = panelScenarios.filter(function (k) {
@@ -193,12 +199,16 @@ function renderCard(data, panelKey, opt, report) {
 
     return '<td class="' + cls.join(' ') + '"' + (span > 1 ? ' rowspan="2"' : '') + '>' +
       '<span class="lbl">' + esc(label) + '</span>' +
-      '<span class="meta">' + esc(amps(d)) +
-      (d.poles === 2 ? ' 2P' : '') +
+      '<span class="meta">' + esc(feedThrough ? 'NO HANDLE' : amps(d)) +
+      (d.poles === 2 && !feedThrough ? ' 2P' : '') +
       (marks.length ? ' ' + marks.join('') : '') +
       '</span>' +
       (sheds ? '<span class="offs">' + sheds + '</span>' : '') +
       (d.role === Model.ROLE_INLET ? '<span class="tagline">BACKUP FEED</span>' : '') +
+      (feedThrough
+        ? '<span class="tagline">NOTHING TO SWITCH &mdash; FEEDS ' +
+          esc((sub ? (sub.shortName || sub.name) : 'A SUBPANEL').toUpperCase()) + '</span>'
+        : '') +
       '</td>';
   }
 
@@ -224,10 +234,41 @@ function renderCard(data, panelKey, opt, report) {
       '<p class="budget">' + esc(fmtW(sum.remainingWatts)) + ' left connected vs ' +
       esc(fmtW(sum.sourceWatts)) + ' available' +
       (sum.over ? ' &mdash; OVER by ' + esc(fmtW(sum.overBy)) : '') +
+      (sum.unsheddableWatts
+        ? '. ' + esc(fmtW(sum.unsheddableWatts)) + ' of that is behind a feed-through tap ' +
+          'and cannot be switched off here.'
+        : '') +
       (sum.untracedDevices.length
-        ? '. Reads low: ' + sum.untracedDevices.length + ' breaker(s) untraced.'
-        : '.') +
+        ? (sum.unsheddableWatts ? ' ' : '. ') + 'Reads low: ' + sum.untracedDevices.length +
+          ' breaker(s) untraced.'
+        : (sum.unsheddableWatts ? '' : '.')) +
       '</p>' +
+      '</div>';
+  }).join('');
+
+  /* ---- what this panel CANNOT switch off ---- */
+
+  /* A breaker sweep of this panel does not reach these loads. Printing them
+   * beside the shed list is the only way the card stops implying it does. */
+  var subBlocks = Model.subpanelsFedFrom(data, panelKey).map(function (sp) {
+    return '<div class="shed tap-block">' +
+      '<div class="shed-h">' + MARK.feedThrough + ' ' + esc(sp.name) + ' &mdash; ' +
+      esc(fmtW(sp.estimatedWattsTotal)) + '</div>' +
+      '<p class="tap-where"><b>Fed through ' + esc((sp.fedFrom || {}).deviceId || '?') +
+      ', which has no handle.</b> Nothing in ' + esc(panel.name) +
+      ' disconnects it. The only disconnect is inside the subpanel: ' +
+      esc(sp.location) + '.</p>' +
+      /* Deliberately NOT the .shed-l ordered list. A numbered list under a
+       * shed heading reads as "do these in order"; these are the handles you
+       * must NOT throw as a set. Different thing, different shape. */
+      ((sp.devices || []).length
+        ? '<p class="tap-where">Inside it: ' + sp.devices.map(function (d) {
+          return esc((d.amps ? d.amps + 'A' : '?') + ' ' + d.label);
+        }).join(' &middot; ') + '</p>'
+        : '') +
+      ((sp.notes || []).length
+        ? '<p class="tap-dont">' + esc(sp.notes[sp.notes.length - 1]) + '</p>'
+        : '') +
       '</div>';
   }).join('');
 
@@ -251,10 +292,26 @@ function renderCard(data, panelKey, opt, report) {
   var stamp = (data.metadata || {}).lastUpdated || 'unknown';
 
   return {
-    html: page(data, panelKey, panel, src, mb, survey, rows, shedBlocks,
+    html: page(data, panelKey, panel, src, mb, survey, rows, shedBlocks, subBlocks,
                procedure, warnings, stamp, panelScenarios, tags, opt),
     survey: survey
   };
+}
+
+/* Which end of the cord goes where. Cheap to print and it is the one thing a
+ * person is actually holding when they read the back of this card. */
+function connectionNote(data, panel) {
+  var inlet = panel.generatorInlet || {};
+  var c = inlet.connection;
+  if (!c) return '';
+  var cable = (data.cables || {})[inlet.cable];
+
+  return '<div class="conn">' +
+    '<b>Inlet:</b> ' +
+    [c.configuration, c.deviceType].filter(Boolean).map(esc).join(' &mdash; ') +
+    (c.location ? '<br><b>Where:</b> ' + esc(c.location) : '') +
+    (cable ? '<br><b>Cord:</b> ' + esc(cable.howItConnects || cable.ends) : '') +
+    '</div>';
 }
 
 function fmtW(n) {
@@ -262,13 +319,14 @@ function fmtW(n) {
   return n >= 1000 ? (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + ' kW' : n + ' W';
 }
 
-function page(data, key, panel, src, mb, survey, rows, shedBlocks,
+function page(data, key, panel, src, mb, survey, rows, shedBlocks, subBlocks,
               procedure, warnings, stamp, panelScenarios, tags, opt) {
   var legend = [
     MARK.critical + ' critical &mdash; keep powered',
     MARK.untraced + ' installed, nothing traced',
     MARK.unconfirmed + ' not confirmed at the panel'
-  ].concat(panelScenarios.map(function (k) {
+  ].concat(subBlocks ? [MARK.feedThrough + ' no handle &mdash; feeds another enclosure'] : [])
+    .concat(panelScenarios.map(function (k) {
     var sc = data.scenarios[k];
     return '<b class="off">' + esc(tags[k]) + '</b> turn off in ' +
       esc(sc.shortName || sc.name);
@@ -326,10 +384,12 @@ function page(data, key, panel, src, mb, survey, rows, shedBlocks,
       '<div class="cols">' +
         '<div>' +
           '<h2>Turn these off first</h2>' + shedBlocks +
+          (subBlocks ? '<h2>You cannot switch these off here</h2>' + subBlocks : '') +
         '</div>' +
         '<div>' +
           '<h2>Step order</h2>' +
           '<ol class="proc">' + procedure + '</ol>' +
+          connectionNote(data, panel) +
           '<p class="foot">Full instructions, photos and search: ' +
           '<b>blackstart.ericpullen.com</b></p>' +
         '</div>' +
@@ -393,6 +453,9 @@ function css(opt) {
   'td.untraced .lbl { font-weight: 500; font-style: italic; }',
   'td.inlet { background: #000; color: #fff; }',
   'td.inlet .meta { color: #ddd; }',
+  /* a feed-through lug is not a breaker: heavy dashed box, never a shed target */
+  'td.tap { border: 1.5px dashed #000; }',
+  'td.tap .lbl { font-weight: 800; }',
   '.tagline { display: block; font-size: 5.6pt; font-weight: 800; letter-spacing: 1px; }',
   '.offs { float: right; margin-left: 3px; }',
   'b.off { display: inline-block; min-width: 8.5pt; padding: 0 1.5pt; margin-left: 1.5pt;',
@@ -424,9 +487,15 @@ function css(opt) {
   '  font-variant-numeric: tabular-nums; }',
   '.shed-l i { font-style: normal; color: #444; font-size: 6.4pt; }',
   '.none { font-size: 7pt; font-style: italic; color: #555; }',
+  '.tap-block { border: 1px dashed #000; padding: 5px 6px; }',
+  '.tap-where { font-size: 6.6pt; line-height: 1.4; margin-bottom: 3px; }',
+  '.tap-dont { font-size: 6.6pt; line-height: 1.4; font-weight: 700;',
+  '  border-top: 0.5px solid #999; padding-top: 3px; }',
   '.budget { font-size: 6.2pt; margin-top: 3px; line-height: 1.35; }',
   'ol.proc { font-size: 7.2pt; line-height: 1.5; padding-left: 14px; }',
-  'ol.proc li { margin-bottom: 1px; }'
+  'ol.proc li { margin-bottom: 1px; }',
+  '.conn { font-size: 6.6pt; line-height: 1.45; margin-top: 6px;',
+  '  border: 0.8px solid #000; padding: 4px 5px; }'
   ].join('\n');
 }
 

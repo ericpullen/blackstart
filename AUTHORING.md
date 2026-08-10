@@ -75,16 +75,18 @@ which no breaker can do, and the validator rejects it.
 | `slots` | Array, always. A single-pole breaker is `[11]`, not `11`. |
 | `poles` | Must equal `slots.length`. |
 | `amps` | The number on the handle. Use `null` — not `0`, and not a guess — if you genuinely cannot read it. The key must still be there. A null-amps device drops out of all load math and the validator warns. |
-| `role` | `branch` for a load. `generatorInlet` for the backup feed — those are excluded from search and load math and drawn green in the grid. |
+| `role` | `branch` for a load. `generatorInlet` for the backup feed — excluded from search and load math, drawn green in the grid. `feedThrough` for a bus tap that is **not a breaker** (see below). |
 | `label` | **What the reader sees in the app.** Write it for a stressed non-technical person. "Kitchen fridge + counter, floor & microwave plugs" beats "Kitchen". Keep it short enough to fit a breaker tile. |
 | `shortLabel` | Optional compact form for the **printed door insert**, where a cell is ~32 characters. Falls back to `label`. `npm run insert` tells you exactly which labels overflow. |
 | `labelSource` | Provenance. Use `authored` once a human wrote it. `placeholder` and `auto-generated…` make the validator warn and the app show a "needs rewriting" callout. |
-| `circuitType` | Free text: `120V branch`, `240V appliance`, `probable MWBC (two 120V legs, shared neutral)`. Displayed, not computed on. |
+| `circuitType` | Free text: `120V branch`, `240V appliance`, `MWBC (two 120V legs sharing one neutral, one common-trip handle)`. Displayed, not computed on — but say `probable MWBC` until someone has actually checked for the shared neutral, because "2-pole" and "240V load" are not the same claim. |
 | `physicalMarking` | Anything written on or stuck to the breaker: `"orange tape"`. **Searchable** — people do search for this. |
+| `physicalMarkingMeaning` | What the mark *means*, once someone knows. Record it the moment you find out: the orange tape here turned out to encode the outage shed list, and until that was written down it was a note to nobody. If it means "shed this", make sure `shedIn` agrees — a test enforces that. |
+| `equipment` | Optional `{ manufacturer, model, description, productUrl }` for the appliance on the end of a single-purpose breaker. `productUrl` **must** be `https://` — it is rendered as a real anchor and the validator rejects anything else. It will not open during an outage; it is provenance. |
 | `priority` | `"critical"` or `null`. Marks the breaker red. Circuits can set it independently. |
 | `shedIn` | Array of scenario keys where this breaker gets turned off. See below. |
 | `hardware` | Optional. `photoVerified: false` makes the app badge it as unverified. |
-| `circuits` | What it feeds. An **empty array means "breaker present, loads unknown"** — rendered differently from an empty slot, and it makes the panel's load figure read low (the meter says so). |
+| `circuits` | What it feeds. An **empty array means "breaker present, loads unknown"** — rendered differently from an empty slot, and it makes the panel's load figure read low (the meter says so). If a device genuinely draws nothing, like a surge protector, give it a real circuit at `0` watts instead. "Nothing to find" and "nobody looked" are different claims. |
 | `notes` | **An array of strings** on a device. |
 | `estimatedWattsTotal` | Must equal the sum of the circuits' `estimatedWatts`. The validator will tell you the right number. |
 
@@ -109,6 +111,83 @@ which no breaker can do, and the validator rejects it.
   the row **Unconfirmed** and the modal says "treat as a guess". Leaving the field
   off is a third state meaning nobody recorded provenance, and the validator warns
   about it. Prefer an explicit `false` over silence.
+
+---
+
+## Inlets and the cord
+
+`panels.<id>.generatorInlet.connection` describes what physically plugs in. The
+field that matters is **`gender`**:
+
+- `male` — a flanged power inlet. An ordinary generator extension cord fits, and
+  no live pins are ever exposed. Both inlets here are male (Reliance Controls
+  PBN30).
+- `female` — a receptacle, which would mean somebody has to improvise a
+  male-to-male cord. The validator warns loudly if this is ever recorded, and
+  it should be treated as a defect to fix, not a fact to document.
+
+Set `genderVerified: true` only when someone has looked at the thing in person.
+This exact field started life as `false`: a photo was read as a female
+twist-lock face and the file carried a high-severity warning about a
+male-to-male cord for weeks before the owner confirmed it was a male inlet all
+along. The block is called `connection`, not `receptacle`, for the same reason —
+the wrong noun is what anchored the wrong reading.
+
+The cord itself lives once in the top-level `cables` object, keyed like
+`backupSources`, and each inlet points at it with `cable: "<id>"`. Spell out
+`ends` (which end is male, which is female) and `howItConnects` source-end
+first — that string is printed on the back of the door card and read by someone
+holding the cord.
+
+---
+
+## Feed-through taps and subpanels
+
+Some things in a panel are not breakers. Panel B 6/8 is a Leviton LFTLA plug-on
+feed-through lug: it fills two breaker positions, taps both busbars, and hands
+the feeder straight through. **No handle, no amp rating, no overcurrent
+protection.** Whatever is downstream is protected only by the panel main.
+
+Record it as `role: "feedThrough"` with `amps: null`, no `circuits`, no
+`shedIn`, and `feeds: "<subpanel id>"`. The validator enforces every one of
+those, because each is a way the data could imply a handle that does not exist.
+The old handwritten card said "Furn" at these slots, which is exactly that
+implication — someone doing a panel sweep would believe they had switched the
+heating off.
+
+What it feeds goes in the top-level `subpanels` array:
+
+```json
+{
+  "id": "hvac-strips",
+  "name": "HVAC heat-strip subpanel",
+  "location": "At the HVAC air handler",
+  "fedFrom": { "panel": "B", "deviceId": "B-6-8" },
+  "mainBreaker": null,
+  "disconnectArrangement": "No main breaker. Three 50A 2-pole handles …",
+  "feeder": { "conductor": "2/0 aluminum", "ampacityAmps": 135,
+              "protectedBy": "Panel B 200A main breaker only" },
+  "devices":    [ { "id": "HVAC-A", "poles": 2, "amps": 50, "serves": ["heat-kit"] } ],
+  "appliances": [ { "id": "heat-kit", "room": "HVAC Air Handler",
+                    "endpoint": "Electric heat kit", "estimatedWatts": 20000 } ],
+  "estimatedWattsTotal": 20000
+}
+```
+
+Three rules, all of which exist because of a specific way this can lie:
+
+1. **Watts live on `appliances`, never on the subpanel's `devices`.** Three 50A
+   breakers feeding one 20 kW heat kit is 20 kW, not 60. The validator rejects
+   `estimatedWatts` on a subpanel breaker outright.
+2. **`location` is load-bearing.** It is what tells a reader that the disconnect
+   is in another room. Say where the enclosure physically is.
+3. **The load counts against the parent panel and can never be shed there.**
+   `loadSummary()` adds it to `remaining` unconditionally and reports it as
+   `unsheddableWatts`; the app, the meter and the printed card all say "no
+   breaker in this panel can remove it".
+
+`position: null` on a subpanel breaker means nobody recorded where it sits —
+which is a different claim from position 1. Leave it null rather than guessing.
 
 ---
 
@@ -318,8 +397,20 @@ Errors (CI fails):
 - No slot both occupied and declared empty; `emptySlots` within range
 - `unassignedEndpoints` entries have a room and endpoint and no panel/slot
 - `shedIn` and `panelsAvailable` reference real scenarios and panels
-- `openQuestions.deviceIds` and `generatorInlet.deviceId` resolve
+- `equipment.productUrl`, if present, is an `https://` URL
+- `generatorInlet.cable` resolves to an entry in `cables`, and every cable has a
+  name, configuration and `ends`
+- `openQuestions.deviceIds`, `openQuestions.subpanelId` and
+  `generatorInlet.deviceId` resolve
 - A `generatorInlet` has no circuits and no `shedIn`
+- A `feedThrough` has `amps: null`, no circuits, no `shedIn`, and a `feeds` that
+  names a real subpanel
+- A subpanel's `fedFrom.deviceId` exists, sits in the stated panel, and points
+  back at the subpanel
+- Subpanel ids and subpanel breaker ids are unique across the whole home
+- A subpanel's `estimatedWattsTotal` equals the sum of its **appliances**
+- Subpanel breakers carry no watts of their own
+- `serves` names an appliance of the same subpanel
 - Every `sw.js` `ASSETS` path exists, and every `src/*.js` and `data/*.json` is listed
 
 Warnings (informational):
@@ -327,7 +418,12 @@ Warnings (informational):
 - Placeholder or auto-generated labels
 - Circuits with `verified: false`, or with no `verified` flag at all
 - Breakers installed with no circuits traced (they count as 0 W)
-- Devices with `amps: null`
+- Devices with `amps: null` (a `feedThrough` is exempt — it has no rating by
+  definition)
+- Appliances with no recorded draw, or claimed by no subpanel breaker
+- A subpanel with neither a `mainBreaker` nor a `disconnectArrangement`
+- An inlet whose connection gender is missing, unverified, or **female**
+- A cable no inlet references
 - Slots neither occupied nor declared empty
 - Endpoints in `unassignedEndpoints`
 - Missing step photos

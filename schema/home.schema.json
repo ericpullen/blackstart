@@ -65,6 +65,46 @@
         }
       }
     },
+    "cables": {
+      "type": "object",
+      "description": "Cords that connect a backup source to a panel inlet, keyed by id and referenced from generatorInlet.cable. Keyed like backupSources so one cord serving two panels is described once.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "name",
+          "configuration",
+          "ends"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "configuration": {
+            "type": "string"
+          },
+          "ends": {
+            "type": "string",
+            "description": "Which end is male and which is female. Spell it out."
+          },
+          "howItConnects": {
+            "type": "string",
+            "description": "Plain language, source end first. This is what someone reads while holding the cord in the dark."
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "verificationMethod": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "equipment": {
       "type": "object",
       "description": "Reference material about the hardware platform. Display-only; nothing computes from it.",
@@ -123,8 +163,55 @@
               "interlockType": {
                 "type": "string"
               },
-              "receptacle": {
-                "type": "object"
+              "cable": {
+                "type": "string",
+                "description": "Key into the top-level cables object. Both panels reference the same cord, so it is described once."
+              },
+              "connection": {
+                "type": "object",
+                "description": "What physically plugs in here. Called `connection`, not `receptacle`: this house's inlets are MALE flanged inlets, and calling one a receptacle is what caused a photo to be misread as needing a male-to-male cord.",
+                "properties": {
+                  "location": {
+                    "type": "string"
+                  },
+                  "deviceType": {
+                    "type": "string"
+                  },
+                  "configuration": {
+                    "type": "string",
+                    "description": "NEMA configuration, e.g. 'NEMA L14-30 (30A, 125/250V, 3-pole 4-wire twist-lock)'."
+                  },
+                  "gender": {
+                    "type": "string",
+                    "enum": [
+                      "male",
+                      "female"
+                    ],
+                    "description": "THE safety-relevant field. Male means a flanged inlet and an ordinary cord. Female means somebody needs a male-to-male cord with live exposed pins — the validator warns loudly if this is ever recorded as female."
+                  },
+                  "genderVerified": {
+                    "type": "boolean",
+                    "description": "Whether the gender was confirmed in person rather than read off a photo. The validator warns until it is true."
+                  },
+                  "manufacturer": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "modelConfidence": {
+                    "$ref": "#/definitions/confidence"
+                  },
+                  "enclosure": {
+                    "type": "string"
+                  },
+                  "confidence": {
+                    "$ref": "#/definitions/confidence"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
               },
               "confidence": {
                 "$ref": "#/definitions/confidence"
@@ -190,9 +277,48 @@
             "type": "string",
             "enum": [
               "branch",
-              "generatorInlet"
+              "generatorInlet",
+              "feedThrough"
             ],
-            "description": "Only 'branch' is a load. 'generatorInlet' is the backup feed and is excluded from search and all load math."
+            "description": "Only 'branch' is a load. 'generatorInlet' is the backup feed and is excluded from search and all load math. 'feedThrough' is NOT a breaker: a plug-on lug that taps the bus, with no handle, no ampacity and no overcurrent protection of its own. It must have amps null, no circuits and no shedIn entries, and must name the subpanel it feeds via `feeds`. Its downstream load is charged to the panel as unsheddable."
+          },
+          "feeds": {
+            "type": "string",
+            "description": "feedThrough only. Id of the entry in subpanels[] that this device feeds. validate.js checks the subpanel points back at this device."
+          },
+          "overcurrentProtection": {
+            "type": "string",
+            "description": "feedThrough only. 'none' for a bare lug tap."
+          },
+          "protectedBy": {
+            "type": "string",
+            "description": "feedThrough only. What actually protects everything downstream, e.g. 'Panel B 200A main breaker only'."
+          },
+          "equipment": {
+            "type": "object",
+            "description": "The identified appliance on a single-purpose breaker. Display-only; nothing computes from it.",
+            "properties": {
+              "manufacturer": {
+                "type": "string"
+              },
+              "model": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "null when the unit is identified by make but the model was never read off it."
+              },
+              "description": {
+                "type": "string"
+              },
+              "productUrl": {
+                "type": "string",
+                "description": "Rendered as a real anchor in the app, so validate.js REQUIRES it to start with https:// — never let a javascript: or data: URI in through the data file. It will not open during an outage; it is provenance, not a feature."
+              }
+            }
+          },
+          "monitoring": {
+            "$ref": "#/definitions/monitoring"
           },
           "label": {
             "type": "string",
@@ -215,6 +341,10 @@
               "null"
             ],
             "description": "Anything written on or stuck to the breaker, e.g. 'orange tape'. Searchable."
+          },
+          "physicalMarkingMeaning": {
+            "type": "string",
+            "description": "What the marking MEANS, once someone knows. A mark whose meaning is unrecorded is a note to nobody: the orange tape here turned out to encode the outage shed list."
           },
           "priority": {
             "type": [
@@ -347,6 +477,232 @@
         }
       }
     },
+    "subpanels": {
+      "type": "array",
+      "description": "Enclosures downstream of a device in one of the panels — in practice, downstream of a feedThrough lug that no breaker in the parent panel can switch off. Their load IS counted against the parent panel's backup source, and is reported as unsheddable, because there is no handle upstream to throw.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "location",
+          "fedFrom",
+          "estimatedWattsTotal"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique across devices too — validate.js checks for collisions."
+          },
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string",
+            "description": "Where the enclosure physically is. Load-bearing: a reader sweeping the parent panel needs to know this is somewhere else entirely."
+          },
+          "locationDetail": {
+            "type": "string"
+          },
+          "fedFrom": {
+            "type": "object",
+            "required": [
+              "panel",
+              "deviceId"
+            ],
+            "properties": {
+              "panel": {
+                "type": "string"
+              },
+              "deviceId": {
+                "type": "string",
+                "description": "The device that feeds this. It must carry feeds: <this id>."
+              }
+            }
+          },
+          "enclosure": {
+            "type": "object"
+          },
+          "mainBreaker": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "null for a subpanel with no main. Pair that with disconnectArrangement so a reader can still tell how to kill power to it."
+          },
+          "disconnectArrangement": {
+            "type": "string",
+            "description": "Plain language: what actually disconnects this, given there may be no main."
+          },
+          "feeder": {
+            "type": "object",
+            "description": "The conductors between the parent panel and here. overcurrentProtection / protectedBy are the fields that matter when the tap is unfused.",
+            "properties": {
+              "conductor": {
+                "type": "string"
+              },
+              "material": {
+                "type": "string"
+              },
+              "size": {
+                "type": "string"
+              },
+              "ampacityAmps": {
+                "type": "number"
+              },
+              "ampacityBasis": {
+                "type": "string"
+              },
+              "overcurrentProtection": {
+                "type": "string"
+              },
+              "protectedBy": {
+                "type": "string"
+              },
+              "verified": {
+                "type": "boolean"
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          },
+          "monitoring": {
+            "$ref": "#/definitions/monitoring"
+          },
+          "devices": {
+            "type": "array",
+            "description": "Breakers INSIDE this enclosure. They must NOT carry watts — watts live on appliances, or one appliance gets counted once per breaker feeding it. validate.js rejects estimatedWatts here.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "label",
+                "amps"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "position": {
+                  "type": [
+                    "integer",
+                    "array",
+                    "null"
+                  ],
+                  "description": "null when the physical position was never recorded — which is a different claim from position 1."
+                },
+                "poles": {
+                  "type": "integer"
+                },
+                "amps": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "serves": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Appliance ids in this subpanel. Several breakers may serve ONE appliance; that is the multi-circuit heat kit case and it must not be summed per breaker."
+                },
+                "verified": {
+                  "type": "boolean"
+                },
+                "notes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "appliances": {
+            "type": "array",
+            "description": "What the subpanel actually feeds. THIS is where watts live. Appears in app search as rows flagged 'No breaker in Panel X'.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "room",
+                "endpoint",
+                "estimatedWatts"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "room": {
+                  "type": "string"
+                },
+                "endpoint": {
+                  "type": "string"
+                },
+                "manufacturer": {
+                  "type": "string"
+                },
+                "model": {
+                  "type": "string"
+                },
+                "rating": {
+                  "type": "string"
+                },
+                "estimatedWatts": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Total for the appliance, however many circuits feed it. null when unknown — the validator warns, because the subpanel total then reads low."
+                },
+                "fieldPowerCircuits": {
+                  "type": "integer"
+                },
+                "fieldPowerCircuitsVerified": {
+                  "type": "boolean"
+                },
+                "voltage": {
+                  "type": "string"
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": [
+                    "critical"
+                  ]
+                },
+                "verified": {
+                  "type": "boolean"
+                },
+                "verificationMethod": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "estimatedWattsTotal": {
+            "type": "number",
+            "description": "Must equal the sum of its APPLIANCES' estimatedWatts (nulls excluded). validate.js enforces this."
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "scenarios": {
       "type": "object",
       "additionalProperties": {
@@ -399,6 +755,10 @@
             "items": {
               "type": "string"
             }
+          },
+          "subpanelId": {
+            "type": "string",
+            "description": "Optional link to an entry in subpanels[], for questions about something downstream of a tap rather than about a breaker."
           },
           "recorded": {
             "type": "string"
@@ -557,6 +917,22 @@
     }
   },
   "definitions": {
+    "monitoring": {
+      "type": "object",
+      "description": "Whether this branch can ever be metered by a smart breaker. Load reaching an enclosure through a feed-through lug never passes a branch breaker, so no amount of breaker swapping instruments it.",
+      "properties": {
+        "smartBreakerMonitorable": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "instrumentationPath": {
+          "type": "string",
+          "description": "What WOULD work, e.g. 'a CT pair on the feeder'."
+        }
+      }
+    },
     "confidence": {
       "type": "string",
       "enum": [
