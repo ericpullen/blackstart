@@ -65,12 +65,14 @@
           "-S / -ST": "Smart (1st gen / 2nd gen) metering + remote trip"
         },
         "smartUpgradePath": {
-          "15A-1P": "LB115-ST",
-          "20A-1P": "LB120-ST",
-          "15A-2P": "LB215-ST",
-          "20A-2P": "LB220-ST",
-          "30A-2P": "LB230-ST",
-          "notes": "2nd-gen smart breakers are the drop-in metering replacements for the standard -T parts in these same slots."
+          "15A-1P": "LB115-0ST",
+          "20A-1P": "LB120-0ST",
+          "15A-2P": "LB215-0ST",
+          "20A-2P": "LB220-0ST",
+          "30A-2P": "LB230-0ST",
+          "40A-2P": "LB240-0ST",
+          "50A-2P": "LB250-0ST",
+          "notes": "2nd-gen smart breakers are the drop-in metering replacements for the standard -T parts in these same slots. The catalog suffix is -0ST, not -ST: every one of these strings is what the installed hardware reports through the LWHEM-2 cloud (verified 2026-08-22 for all seven ratings except 25A/60A, which this house does not use). 22 of the 32 devices in this file are now these parts."
         }
       }
     }
@@ -175,9 +177,7 @@
         5,
         7,
         15,
-        17,
         18,
-        19,
         20,
         21,
         22,
@@ -201,15 +201,16 @@
       "amps": 30,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB230-T",
+        "catalogNumber": "LB230-0ST",
         "legacyCatalogNumber": "LB230",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0107964",
-        "smartReplacement": "LB230-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB230-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Dryer outlet",
@@ -239,7 +240,20 @@
       "notes": [
         "The orange tape means 'shut this off in an outage'. Confirmed by the owner: the dryer is not needed on backup power."
       ],
-      "estimatedWattsTotal": 5000
+      "estimatedWattsTotal": 5000,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 1,
+          "channelId": "breaker_p1",
+          "levitonLabel": "Dryer",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-5-7",
@@ -252,18 +266,19 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB220-T",
+        "catalogNumber": "LB220-0ST",
         "legacyCatalogNumber": "LB220",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0107844",
-        "smartReplacement": "LB220-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB220-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
-      "label": "Basement \u2014 fridge, bath, ejector pump",
+      "label": "Basement — fridge, bath, ejector pump",
       "shortLabel": "Basement: fridge, bath, pump",
       "labelSource": "authored",
       "circuitType": "MWBC (two 120V legs sharing one neutral, one common-trip handle)",
@@ -319,7 +334,20 @@
         "CONFIRMED multi-wire branch circuit: two 120V legs sharing one neutral under one common-trip handle. Not a 240V load.",
         "Endpoints are recorded on slot 7 only. The slot 5 leg is real but nothing on it has been traced yet - see A-unmapped."
       ],
-      "estimatedWattsTotal": 1000
+      "estimatedWattsTotal": 1000,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 5,
+          "channelId": "breaker_p5",
+          "levitonLabel": "Finished Basement/Ejector Pump",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-9",
@@ -331,15 +359,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB120-T",
+        "catalogNumber": "LB120-0ST",
         "legacyCatalogNumber": "LB120",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0106687",
-        "smartReplacement": "LB120-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB120-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Washer outlet",
@@ -361,7 +390,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 500
+      "estimatedWattsTotal": 500,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 9,
+          "channelId": "breaker_p9",
+          "levitonLabel": "Washing Machine",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-11",
@@ -373,15 +415,16 @@
       "amps": 15,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB115-T",
+        "catalogNumber": "LB115-0ST",
         "legacyCatalogNumber": "LB115",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0146422",
-        "smartReplacement": "LB115-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB115-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Mud room + basement lights & plugs",
@@ -483,7 +526,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 1480
+      "estimatedWattsTotal": 1480,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 11,
+          "channelId": "breaker_p11",
+          "levitonLabel": "Mud room And Basement",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-13-15",
@@ -496,15 +552,16 @@
       "amps": 15,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB215-T",
+        "catalogNumber": "LB215-0ST",
         "legacyCatalogNumber": "LB215",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB215-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB215-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Bedrooms + office (internet) + full bath",
@@ -597,7 +654,20 @@
       "notes": [
         "CONFIRMED multi-wire branch circuit: two 120V legs sharing one neutral under one common-trip handle. Not a 240V load. Both legs are traced."
       ],
-      "estimatedWattsTotal": 700
+      "estimatedWattsTotal": 700,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 13,
+          "channelId": "breaker_p13",
+          "levitonLabel": "Bedroom Lights And Plugs",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-17",
@@ -609,15 +679,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB120-T",
+        "catalogNumber": "LB120-0ST",
         "legacyCatalogNumber": "LB120",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB120-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB120-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Kitchen hood + hallway & mud room lights",
@@ -662,7 +733,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 460
+      "estimatedWattsTotal": 460,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 17,
+          "channelId": "breaker_p17",
+          "levitonLabel": "Kitchen Hood/Hallway Lights",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-19-21",
@@ -675,15 +759,16 @@
       "amps": 30,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB230-T",
+        "catalogNumber": "LB230-0ST",
         "legacyCatalogNumber": "LB230",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB230-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB230-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Water heater",
@@ -716,7 +801,20 @@
         "Location taken from the A-30 note ('on side with hot water heater'). Confirm the tank is on this circuit by killing 19/21 and checking for hot water.",
         "Shed in BOTH scenarios. At roughly 4.5 kW it exceeds the Anker's entire 3.8 kW output on its own. A tank holds hot water for hours with the power off."
       ],
-      "estimatedWattsTotal": 4500
+      "estimatedWattsTotal": 4500,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 19,
+          "channelId": "breaker_p19",
+          "levitonLabel": "Water Heater",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-23-25",
@@ -729,15 +827,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB220-T",
+        "catalogNumber": "LB220-0ST",
         "legacyCatalogNumber": "LB220",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB220-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB220-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Mini-split — mud room addition",
@@ -775,7 +874,20 @@
         "Identified by the owner as a Pioneer 12k mini-split serving the mud room addition. This RESOLVES the old contradiction: the 3500 W figure was wrong, not the breaker. A 12k BTU inverter unit draws roughly 1 kW and sits comfortably on a 20A 2-pole.",
         "It is a HEAT PUMP, so it heats as well as cools. It is shed by default in both scenarios, but at roughly 1.2 kW it is by far the cheapest heat in the house - worth bringing back if the load budget allows and the Panel B heat kit is locked out."
       ],
-      "estimatedWattsTotal": 1200
+      "estimatedWattsTotal": 1200,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 23,
+          "channelId": "breaker_p23",
+          "levitonLabel": "Mud Room Air Conditioner",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-27-29",
@@ -796,17 +908,19 @@
         "hacr": true,
         "issueNo": null,
         "smartReplacement": "LB220-ST",
-        "photoVerified": true
+        "photoVerified": true,
+        "confidence": "high",
+        "notes": "The breaker is the photo-verified 20 A 2-pole LB220-T that used to feed the external Siemens SPD; the owner confirmed it was reused as-is on 2026-08-22 and only what it feeds changed."
       },
       "role": "branch",
-      "label": "Surge protective device (Siemens)",
-      "shortLabel": "Surge protector (Siemens)",
+      "label": "Leviton energy monitor (LWHEM-2)",
+      "shortLabel": "Energy monitor (LWHEM-2)",
       "labelSource": "owner identification",
       "circuitType": "240V device",
       "equipment": {
-        "manufacturer": "Siemens",
-        "model": null,
-        "description": "Whole-house surge protective device. Model not recorded - read it off the unit."
+        "manufacturer": "Leviton",
+        "model": "LWHEM-2",
+        "description": "Load center energy monitor for Panel A - the hub the smart breakers report through, and the source of every Leviton reading in the energycap pipeline"
       },
       "physicalMarking": null,
       "priority": null,
@@ -814,22 +928,30 @@
       "circuits": [
         {
           "room": "Garage",
-          "endpoint": "Whole-house surge protective device",
-          "estimatedWatts": 0,
+          "endpoint": "Leviton LWHEM-2 energy monitor (Panel A)",
+          "estimatedWatts": 5,
           "fedFromSlot": [
             27,
             29
           ],
           "voltage": "240V",
-          "notes": "An SPD is not a load - it sits across the line and draws essentially nothing until it clamps. Recorded at 0 W deliberately, so this breaker reads as 'nothing to trace' rather than 'untraced'.",
+          "notes": "5 W is an order-of-magnitude estimate for a metering gateway, not a nameplate reading. It is recorded as a real small figure rather than 0 W so the breaker does not read as untraced, and it is noise against either backup source's ceiling.",
           "verified": true,
           "verificationMethod": "owner identification"
         }
       ],
       "notes": [
-        "Confirmed by the owner as the Siemens surge protector. Leave it ON: it costs nothing to run and it is protecting the house at exactly the moment the grid comes back."
+        "DO NOT SHED, and it is not in any shed list. This breaker powers the Leviton LWHEM-2 energy monitor - the gateway every smart breaker in this panel reports through. Switching it off does NOT de-energise anything else: the smart breakers are ordinary mechanical breakers and keep carrying current. What you lose is all metering, the app, and remote on/off for this panel, which is exactly the visibility you want during an outage.",
+        "One monitor per panel, each on its own breaker: Panel A's is on A-27-29, Panel B's on B-17-19. They are separate devices with separate hub ids, which is why a panel's smart breakers go dark independently of the other panel's.",
+        "Unlike the feed-through lug at B 6/8, this IS a breaker with a handle. There is something to switch here; the instruction is simply not to.",
+        "CORRECTED 2026-08-22. This was recorded as the Siemens whole-house SPD on the owner's earlier identification, and the Leviton app's own name for it - 'Smart Home' - is what raised the doubt. The Siemens unit was external and fed from here; it is gone, replaced by the plug-on LSPD1-T now at 22/24, and these slots became the monitor's supply."
       ],
-      "estimatedWattsTotal": 0
+      "estimatedWattsTotal": 5,
+      "monitoring": {
+        "smartBreakerMonitorable": false,
+        "reason": "The monitor's own supply comes through a dumb breaker, and nothing upstream of it is metered, so the one load in the house that can never appear in the data is the metering system itself.",
+        "instrumentationPath": "None worth building. It is a few watts, and swapping this breaker for a smart one would put the monitor's supply through a breaker that needs the monitor to report."
+      }
     },
     {
       "id": "A-2-4",
@@ -876,18 +998,19 @@
       "amps": 15,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB115-T",
+        "catalogNumber": "LB115-0ST",
         "legacyCatalogNumber": "LB115",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0109615",
-        "smartReplacement": "LB115-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB115-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
-      "label": "Front of house \u2014 living room, foyer, porch, Myia's room",
+      "label": "Front of house — living room, foyer, porch, Myia's room",
       "shortLabel": "Living rm, foyer, porch, Myia",
       "labelSource": "authored",
       "circuitType": "120V branch",
@@ -966,7 +1089,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 720
+      "estimatedWattsTotal": 720,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 6,
+          "channelId": "breaker_p6",
+          "levitonLabel": "Front Of House",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-8",
@@ -978,15 +1114,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB120-T",
+        "catalogNumber": "LB120-0ST",
         "legacyCatalogNumber": "LB120",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0106687",
-        "smartReplacement": "LB120-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB120-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Dining room plugs + TV / fireplace plugs",
@@ -1023,7 +1160,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 500
+      "estimatedWattsTotal": 500,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 8,
+          "channelId": "breaker_p8",
+          "levitonLabel": "Dining Room Plugs/TV",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-10-12",
@@ -1036,15 +1186,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB220-T",
+        "catalogNumber": "LB220-0ST",
         "legacyCatalogNumber": "LB220",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0101662",
-        "smartReplacement": "LB220-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB220-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Kitchen counter plugs + dishwasher",
@@ -1082,7 +1233,20 @@
         "Endpoints are recorded on slot 10 only. The slot 12 leg is real but nothing on it has been traced yet - see A-unmapped.",
         "The orange tape means 'shut this off in an outage'. Confirmed by the owner: shed in BOTH scenarios, not just truck-away. The dishwasher alone is 1.8 kW."
       ],
-      "estimatedWattsTotal": 3300
+      "estimatedWattsTotal": 3300,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 10,
+          "channelId": "breaker_p10",
+          "levitonLabel": "Kitchen Counter/Dishwasher",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-14",
@@ -1094,15 +1258,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB120-T",
+        "catalogNumber": "LB120-0ST",
         "legacyCatalogNumber": "LB120",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0106687",
-        "smartReplacement": "LB120-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB120-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Lamp floor plugs",
@@ -1122,7 +1287,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 200
+      "estimatedWattsTotal": 200,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 14,
+          "channelId": "breaker_p14",
+          "levitonLabel": "Family Room Lamp Plugs",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-16",
@@ -1134,18 +1312,19 @@
       "amps": 15,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB115-T",
+        "catalogNumber": "LB115-0ST",
         "legacyCatalogNumber": "LB115",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0109615",
-        "smartReplacement": "LB115-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB115-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
-      "label": "Main floor lights \u2014 dining, living, family, kitchen",
+      "label": "Main floor lights — dining, living, family, kitchen",
       "shortLabel": "Main floor lights",
       "labelSource": "authored",
       "circuitType": "120V branch",
@@ -1220,7 +1399,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 905
+      "estimatedWattsTotal": 905,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 16,
+          "channelId": "breaker_p16",
+          "levitonLabel": "Main Floor Lights",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-18",
@@ -1232,15 +1424,16 @@
       "amps": 15,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB115-T",
+        "catalogNumber": "LB115-0ST",
         "legacyCatalogNumber": "LB115",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB115-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB115-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Outside basement outlet and flood light",
@@ -1261,7 +1454,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 200
+      "estimatedWattsTotal": 200,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 18,
+          "channelId": "breaker_p18",
+          "levitonLabel": "Outside Basement Outlet/Light",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-20",
@@ -1273,15 +1479,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB120-T",
+        "catalogNumber": "LB120-0ST",
         "legacyCatalogNumber": "LB120",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB120-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB120-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Septic pump + doorbell",
@@ -1311,7 +1518,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 760
+      "estimatedWattsTotal": 760,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 20,
+          "channelId": "breaker_p20",
+          "levitonLabel": "Septic Pump/doorbell",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-22",
@@ -1323,15 +1543,15 @@
       "amps": 15,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB115-T",
-        "legacyCatalogNumber": "LB115",
-        "breakerType": "standard thermal-magnetic",
-        "voltage": "120V~",
+        "catalogNumber": "LSPD1-T",
+        "breakerType": "plug-on Type 1 surge protective device with two independent 15 A single-pole thermal-magnetic branch breakers in one body",
+        "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB115-ST",
-        "photoVerified": true
+        "photoVerified": false,
+        "confidence": "high",
+        "notes": "Installed 2026-08-22 in place of the two separate 1-pole 15 A LB115-T breakers that were in slots 22 and 24. ONE PHYSICAL BODY HOLDS BOTH BREAKERS AND THE SPD: A-22 and A-24 are still two devices here because they still switch and trip independently, which is what the panel reader needs, but pulling the unit removes both circuits and the panel's surge protection together. Ratings are Leviton's published spec (Type 1, 25 kA surge, 10 kA SCCR, 10 kA nominal discharge); the body has not been photographed. There is no smart variant, so smartReplacement is deliberately absent."
       },
       "role": "branch",
       "label": "Master bath + closet lights",
@@ -1374,8 +1594,18 @@
           "verificationMethod": "breaker walk-through"
         }
       ],
-      "notes": [],
-      "estimatedWattsTotal": 360
+      "notes": [
+        "This breaker lives in the Leviton LSPD1-T at 22/24, which is also the whole-panel surge protective device. The circuits it feeds did not change when it went in on 2026-08-22.",
+        "SWITCHING IT OFF DOES NOT DISABLE SURGE PROTECTION. Leviton's spec is explicit that the SPD is fed line-side and 'surge protection continues, even if the breaker is off, or tripped'. So these two circuits can be shed like any others without giving up protection - which is not true of the older arrangement, where an external SPD sat behind its own breaker.",
+        "PULLING THE UNIT is the thing to think twice about: it takes out both circuits and the surge protection at once, and it is the only surge protection Panel A has now.",
+        "Status is on the unit's own LEDs, not in this app: green = protected, red = protection gone, replace the unit, off = no power. Worth a look when you are at the panel anyway."
+      ],
+      "estimatedWattsTotal": 360,
+      "monitoring": {
+        "smartBreakerMonitorable": false,
+        "reason": "Leviton makes no smart/metering version of the LSPD1-T, so these two circuits are the only branch circuits in Panel A that cannot report usage - the other 18 devices all do. It is a combination device: metering them means giving up the panel's surge protection or finding the SPD another two slots, and Panel A has none free.",
+        "instrumentationPath": "A CT on each of the two branch conductors, or accept the gap - these are lights and a vent fan, about 770 W of connected load between them."
+      }
     },
     {
       "id": "A-24",
@@ -1387,15 +1617,15 @@
       "amps": 15,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB115-T",
-        "legacyCatalogNumber": "LB115",
-        "breakerType": "standard thermal-magnetic",
-        "voltage": "120V~",
+        "catalogNumber": "LSPD1-T",
+        "breakerType": "plug-on Type 1 surge protective device with two independent 15 A single-pole thermal-magnetic branch breakers in one body",
+        "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB115-ST",
-        "photoVerified": true
+        "photoVerified": false,
+        "confidence": "high",
+        "notes": "Installed 2026-08-22 in place of the two separate 1-pole 15 A LB115-T breakers that were in slots 22 and 24. ONE PHYSICAL BODY HOLDS BOTH BREAKERS AND THE SPD: A-22 and A-24 are still two devices here because they still switch and trip independently, which is what the panel reader needs, but pulling the unit removes both circuits and the panel's surge protection together. Ratings are Leviton's published spec (Type 1, 25 kA surge, 10 kA SCCR, 10 kA nominal discharge); the body has not been photographed. There is no smart variant, so smartReplacement is deliberately absent."
       },
       "role": "branch",
       "label": "Half bath + foyer plug + toilet closet",
@@ -1455,8 +1685,18 @@
           "verificationMethod": "breaker walk-through"
         }
       ],
-      "notes": [],
-      "estimatedWattsTotal": 410
+      "notes": [
+        "This breaker lives in the Leviton LSPD1-T at 22/24, which is also the whole-panel surge protective device. The circuits it feeds did not change when it went in on 2026-08-22.",
+        "SWITCHING IT OFF DOES NOT DISABLE SURGE PROTECTION. Leviton's spec is explicit that the SPD is fed line-side and 'surge protection continues, even if the breaker is off, or tripped'. So these two circuits can be shed like any others without giving up protection - which is not true of the older arrangement, where an external SPD sat behind its own breaker.",
+        "PULLING THE UNIT is the thing to think twice about: it takes out both circuits and the surge protection at once, and it is the only surge protection Panel A has now.",
+        "Status is on the unit's own LEDs, not in this app: green = protected, red = protection gone, replace the unit, off = no power. Worth a look when you are at the panel anyway."
+      ],
+      "estimatedWattsTotal": 410,
+      "monitoring": {
+        "smartBreakerMonitorable": false,
+        "reason": "Leviton makes no smart/metering version of the LSPD1-T, so these two circuits are the only branch circuits in Panel A that cannot report usage - the other 18 devices all do. It is a combination device: metering them means giving up the panel's surge protection or finding the SPD another two slots, and Panel A has none free.",
+        "instrumentationPath": "A CT on each of the two branch conductors, or accept the gap - these are lights and a vent fan, about 770 W of connected load between them."
+      }
     },
     {
       "id": "A-26",
@@ -1468,15 +1708,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB120-T",
+        "catalogNumber": "LB120-0ST",
         "legacyCatalogNumber": "LB120",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB120-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB120-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Kitchen fridge + counter, floor & microwave plugs",
@@ -1523,7 +1764,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 1850
+      "estimatedWattsTotal": 1850,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 26,
+          "channelId": "breaker_p26",
+          "levitonLabel": "Kitchen Fridge/Microwave",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-28",
@@ -1535,15 +1789,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB120-T",
+        "catalogNumber": "LB120-0ST",
         "legacyCatalogNumber": "LB120",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB120-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB120-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Sump Pump",
@@ -1564,7 +1819,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 800
+      "estimatedWattsTotal": 800,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 28,
+          "channelId": "breaker_p28",
+          "levitonLabel": "Sump Pump",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "A-30",
@@ -1576,18 +1844,19 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB120-T",
+        "catalogNumber": "LB120-0ST",
         "legacyCatalogNumber": "LB120",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB120-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB120-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
-      "label": "Basement plugs \u2014 door side + water heater side",
+      "label": "Basement plugs — door side + water heater side",
       "shortLabel": "Basement plugs (both sides)",
       "labelSource": "authored",
       "circuitType": "120V branch",
@@ -1614,7 +1883,20 @@
         }
       ],
       "notes": [],
-      "estimatedWattsTotal": 400
+      "estimatedWattsTotal": 400,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D52",
+          "hubName": "Panel A",
+          "position": 30,
+          "channelId": "breaker_p30",
+          "levitonLabel": "Basement Plugs Door Side/WH Side",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "B-1-3",
@@ -1627,15 +1909,16 @@
       "amps": 50,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB250-T",
+        "catalogNumber": "LB250-0ST",
         "legacyCatalogNumber": "LB250",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": "0109618",
-        "smartReplacement": "LB250-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB250-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Cooktop",
@@ -1664,7 +1947,20 @@
         "Amps corrected from 40 to 50 per photo.",
         "Panel directory agrees: 1/3 = Cooktop."
       ],
-      "estimatedWattsTotal": 7500
+      "estimatedWattsTotal": 7500,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D48",
+          "hubName": "Panel B",
+          "position": 1,
+          "channelId": "breaker_p1",
+          "levitonLabel": "Cooktop",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "B-2-4",
@@ -1743,7 +2039,8 @@
         "The handwritten directory card reads 'Furn' at 6/8. That label is WRONG and must not be carried forward - there is no furnace breaker here, and nothing at Panel B disconnects what this feeds.",
         "It feeds the HVAC heat-strip subpanel at the air handler (2/0 aluminum, roughly 135A at 75C). The only disconnecting means for those loads is inside that subpanel.",
         "Its downstream load (20 kW of electric heat) IS counted in the Panel B load figure, but it can never be shed at Panel B.",
-        "It probably explains the phantom 'Oven' the directory card lists at 5/7. Those slots face this lug, and the 2/0 feeder conductors landing here most likely make the pair unusable - so a breaker that was written on the card was never installed there. Treat 5/7 as doubtful when planning expansion."
+        "It probably explains the phantom 'Oven' the directory card lists at 5/7. Those slots face this lug, and the 2/0 feeder conductors landing here most likely make the pair unusable - so a breaker that was written on the card was never installed there. Treat 5/7 as doubtful when planning expansion.",
+        "INDEPENDENT CORROBORATION, 2026-08-22: in the Leviton app the owner labelled the placeholder object occupying these two positions 'Heat Strip Subpanel'. That is a second, separately recorded statement that 6/8 feeds the HVAC subpanel and not a branch circuit."
       ],
       "estimatedWattsTotal": 0
     },
@@ -1758,15 +2055,16 @@
       "amps": 40,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB240-T",
+        "catalogNumber": "LB240-0ST",
         "legacyCatalogNumber": "LB240",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB240-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB240-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Heat pump outdoor unit (Bryant 284ANV060000, 5-ton)",
@@ -1786,9 +2084,23 @@
         "This is the OUTDOOR half of the same system the HVAC subpanel serves. The indoor half is the FE4ANB006L00 fan coil and the KFCEH3301C20 electric heat kit, both behind the feed-through lug at 6/8.",
         "DELIBERATELY NOT SHED. The Panel B outage procedure is heat-pump-only: lock the electric heat out at the Evolution Connex control and let the heat pump run. Shedding this breaker would turn off the one piece of heating that fits inside a 7.2 kW inlet.",
         "40A 2-pole confirmed from photo. No load figure recorded, so it contributes 0 W to the Panel B load meter - see hvac-heat-pump-on-truck before assuming it fits.",
-        "A 'Mud Room Air Conditioner' is also recorded on Panel A 23/25 (20A 2-pole). That is a separate unit or a wrong label; this one is the main system."
+        "A 'Mud Room Air Conditioner' is also recorded on Panel A 23/25 (20A 2-pole). That is a separate unit or a wrong label; this one is the main system.",
+        "METERED as of 2026-08-22. The LB240-0ST smart breaker on these slots reports this circuit's real draw every 30 seconds (1,350 W observed with the compressor at part capacity), so the 0 W above - the last untraced load in the house, and the reason the Panel B meter reads LOW - can be replaced with a measured figure once a few days of heating and cooling have been recorded. Do not guess it from this one sample: a variable-speed 5-ton unit at part capacity is nothing like its peak."
       ],
-      "estimatedWattsTotal": 0
+      "estimatedWattsTotal": 0,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D48",
+          "hubName": "Panel B",
+          "position": 10,
+          "channelId": "breaker_p10",
+          "levitonLabel": "Heat Pump",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "B-14-16",
@@ -1801,15 +2113,16 @@
       "amps": 40,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB240-T",
+        "catalogNumber": "LB240-0ST",
         "legacyCatalogNumber": "LB240",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120/240V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB240-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB240-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Double oven",
@@ -1839,7 +2152,20 @@
         "CONFIRMED at 14/16 by the owner. This closes the old contradiction: the walkthrough had the oven on 'Panel B breaker 2', and following that would have shut off the generator inlet while leaving a 5 kW oven live behind it.",
         "The directory card's other 'Oven' entry, at 5/7, is simply wrong - those slots are empty."
       ],
-      "estimatedWattsTotal": 5000
+      "estimatedWattsTotal": 5000,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D48",
+          "hubName": "Panel B",
+          "position": 14,
+          "channelId": "breaker_p14",
+          "levitonLabel": "Oven",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "B-9",
@@ -1978,15 +2304,16 @@
       "amps": 20,
       "hardware": {
         "manufacturer": "Leviton",
-        "catalogNumber": "LB120-T",
+        "catalogNumber": "LB120-0ST",
         "legacyCatalogNumber": "LB120",
-        "breakerType": "standard thermal-magnetic",
+        "breakerType": "2nd-gen smart breaker — thermal-magnetic with per-pole metering and remote trip",
         "voltage": "120V~",
         "interruptRating": "10kA",
         "hacr": true,
         "issueNo": null,
-        "smartReplacement": "LB120-ST",
-        "photoVerified": true
+        "replacedCatalogNumber": "LB120-T",
+        "confidence": "high",
+        "notes": "Smart-breaker retrofit of 2026-08-22. The catalog number, amps and pole count are the Leviton cloud's own report of the breaker that is physically in this slot, read through the LWHEM-2 energy monitor - provenance at least as strong as a photograph, which is why this record is not badged unverified even though nobody has photographed the new body. The breaker it replaced is kept in replacedCatalogNumber."
       },
       "role": "branch",
       "label": "Anker F3800+ trickle-charge outlet",
@@ -2010,9 +2337,23 @@
       "notes": [
         "This is the outlet the trickle-charge safety warning is about. Step 1 of the Panel A procedure is to unplug the Anker from it before connecting the Anker to Panel A.",
         "WORTH KNOWING: the outlet is on PANEL B, but the Anker backs up PANEL A. So when the truck is powering Panel B, this plug is live from the truck - which makes it the no-extra-cable way to recharge the Anker mid-outage. The truck is then carrying both panels through the Anker, so watch the 7.2 kW ceiling.",
-        "Not shed in any scenario, precisely so that recharge path stays available. If you are not using it, unplug the Anker rather than switching the breaker."
+        "Not shed in any scenario, precisely so that recharge path stays available. If you are not using it, unplug the Anker rather than switching the breaker.",
+        "METERED as of 2026-08-22. The LB120-0ST smart breaker on this slot measures the trickle-charge rate directly, which is what the 1,000 W placeholder above was waiting for. Read it off the recorded data rather than the Anker app."
       ],
-      "estimatedWattsTotal": 1000
+      "estimatedWattsTotal": 1000,
+      "monitoring": {
+        "smartBreakerMonitorable": true,
+        "smartBreakerInstalled": true,
+        "meteredBy": {
+          "system": "Leviton LWHEM-2 load center energy monitor",
+          "hubId": "1000_0046_1D48",
+          "hubName": "Panel B",
+          "position": 26,
+          "channelId": "breaker_p26",
+          "levitonLabel": "Battery charger",
+          "pipeline": "energycap raw_30s, source='leviton', device_id=hub id, channel_id as above; the label in that pipeline is inherited from THIS file"
+        }
+      }
     },
     {
       "id": "B-28-30",
@@ -2068,6 +2409,70 @@
         "Leave it ON: it costs nothing to run and it is protecting the house at exactly the moment the grid comes back."
       ],
       "estimatedWattsTotal": 0
+    },
+    {
+      "id": "B-17-19",
+      "panel": "B",
+      "slots": [
+        17,
+        19
+      ],
+      "poles": 2,
+      "amps": 15,
+      "hardware": {
+        "manufacturer": "Leviton",
+        "catalogNumber": "LB215-T",
+        "legacyCatalogNumber": "LB215",
+        "breakerType": "standard thermal-magnetic",
+        "voltage": "120/240V~",
+        "interruptRating": "10kA",
+        "hacr": true,
+        "issueNo": null,
+        "smartReplacement": "LB215-0ST",
+        "photoVerified": false,
+        "confidence": "medium",
+        "notes": "Owner-reported 2026-08-22. The catalog number is inferred from this file's own platform table (15 A 2-pole = LB215-T) plus every breaker in these panels being a Leviton plug-on part; nobody has read it off the breaker, so it is not photo-verified. What IS owner-confirmed is what matters here: 2-pole, 15 A, and a dumb breaker - it does not meter itself."
+      },
+      "role": "branch",
+      "label": "Leviton energy monitor (LWHEM-2)",
+      "shortLabel": "Energy monitor (LWHEM-2)",
+      "labelSource": "owner identification",
+      "circuitType": "240V device",
+      "equipment": {
+        "manufacturer": "Leviton",
+        "model": "LWHEM-2",
+        "description": "Load center energy monitor for Panel B - the hub the smart breakers report through, and the source of every Leviton reading in the energycap pipeline"
+      },
+      "physicalMarking": null,
+      "priority": null,
+      "shedIn": [],
+      "circuits": [
+        {
+          "room": "Garage",
+          "endpoint": "Leviton LWHEM-2 energy monitor (Panel B)",
+          "estimatedWatts": 5,
+          "fedFromSlot": [
+            17,
+            19
+          ],
+          "voltage": "240V",
+          "notes": "5 W is an order-of-magnitude estimate for a metering gateway, not a nameplate reading. It is recorded as a real small figure rather than 0 W so the breaker does not read as untraced, and it is noise against either backup source's ceiling.",
+          "verified": true,
+          "verificationMethod": "owner identification"
+        }
+      ],
+      "notes": [
+        "DO NOT SHED, and it is not in any shed list. This breaker powers the Leviton LWHEM-2 energy monitor - the gateway every smart breaker in this panel reports through. Switching it off does NOT de-energise anything else: the smart breakers are ordinary mechanical breakers and keep carrying current. What you lose is all metering, the app, and remote on/off for this panel, which is exactly the visibility you want during an outage.",
+        "One monitor per panel, each on its own breaker: Panel A's is on A-27-29, Panel B's on B-17-19. They are separate devices with separate hub ids, which is why a panel's smart breakers go dark independently of the other panel's.",
+        "Unlike the feed-through lug at B 6/8, this IS a breaker with a handle. There is something to switch here; the instruction is simply not to.",
+        "These two slots were previously recorded as VERIFIED EMPTY from the panel photo, and the Leviton app's placeholder object here is what raised the contradiction. Owner-resolved 2026-08-22: the breaker is real, so Panel B has one fewer available pair than the empty-slot count used to imply."
+      ],
+      "estimatedWattsTotal": 5,
+      "monitoring": {
+        "smartBreakerMonitorable": false,
+        "reason": "The monitor's own supply comes through a dumb breaker, and nothing upstream of it is metered, so the one load in the house that can never appear in the data is the metering system itself.",
+        "instrumentationPath": "None worth building. It is a few watts, and swapping this breaker for a smart one would put the monitor's supply through a breaker that needs the monitor to report."
+      }
     }
   ],
   "subpanels": [
@@ -2505,9 +2910,19 @@
     "Bedroom on Right": "Jordan's Room"
   },
   "metadata": {
-    "lastUpdated": "2026-08-10",
+    "lastUpdated": "2026-08-22",
     "notes": "Device-first schema. One entry per physical breaker; circuits nest underneath. Shed lists live on devices via shedIn so common-trip behaviour is explicit and there is one source of truth. Not every device is a breaker: role 'feedThrough' is a bus tap with no overcurrent protection, and what it feeds lives in subpanels[]. Handwritten panel directory cards are historical, not authoritative.",
     "changelog": [
+      {
+        "version": "2.8",
+        "date": "2026-08-22",
+        "summary": "Owner resolved both questions v2.7 raised. Each panel's Leviton LWHEM-2 energy monitor sits on its own 2-pole dumb breaker: Panel B on a 15 A breaker at 17/19 - so those slots are NOT empty and the panel reconciles again at 18 occupied + 12 empty - and Panel A on the reused 20 A LB220-T at 27/29, which was NOT the Siemens SPD it had been recorded as. Leviton's own 'Smart Home' label for 27/29 was right. Both monitor breakers are DO NOT SHED, and the reason is not the obvious one: switching one off de-energises nothing, because smart breakers are ordinary mechanical breakers, but it takes out all metering, the app and remote control for that panel. It also means the one load in the house that can never be measured is the metering system itself. Panel A's surge protection is now a plug-on Leviton LSPD1-T at 22/24, which is a COMBINATION device - two independent 15 A single-pole breakers plus a Type 1 SPD in one body - so A-22 and A-24 keep their identities, their ten circuits and their ~770 W unchanged; only their hardware record changed. Per Leviton's spec the SPD is fed line-side and keeps protecting with those breakers off or tripped, which is a real improvement on the external Siemens unit it replaced (Panel B keeps its own Siemens SPD at 28/30). The one coverage consequence: no smart LSPD1-T exists, so A-22 and A-24 are the only Panel A branch circuits that can never report usage."
+      },
+      {
+        "version": "2.7",
+        "date": "2026-08-22",
+        "summary": "Smart-breaker retrofit. 22 of the 32 devices are now Leviton 2nd-gen smart breakers (-0ST), up from 2: 18 of Panel A's 22 devices and 4 in Panel B. Every catalog number, amp rating and pole count in this change is the installed hardware's own report through the LWHEM-2 cloud, cross-checked against the amps and poles already recorded here - all 22 agreed, so no rating changed. Each retrofitted device gains a monitoring block naming the hub, position and channel_id it is metered under, which is the join the energycap pipeline uses to inherit its label from this file. Two consequences worth knowing: B-10-12, the 5-ton heat pump and the last untraced load in the house, is now metered, so the Panel B load meter's 'reads LOW' warning can finally be closed with a measured figure; and B-26 measures the Anker trickle-charge rate that was a 1,000 W placeholder. Two new medium open questions came out of the same data - a monitor module apparently at Panel B 17/19 (so those slots are no longer claimed verified-empty) and a conflicting name on Panel A 27/29. Leviton's own label for Panel B 6/8, 'Heat Strip Subpanel', independently corroborates the feed-through finding."
+      },
       {
         "version": "2.6",
         "date": "2026-08-10",

@@ -144,6 +144,20 @@ function run() {
     check('panel ' + p + ' reports surveyed', st.surveyed, true);
   });
 
+  /* Panel B 17/19 reconcile because they hold the breaker feeding the LWHEM-2
+   * energy monitor (owner-confirmed 2026-08-22), NOT because they went back to
+   * being declared empty. If a future edit "fixes" the reconciliation by
+   * listing them as empty again, that is the regression this catches. */
+  [['B', 'B-17-19', 17], ['A', 'A-27-29', 27]].forEach(function (row) {
+    var panel = row[0], id = row[1], slot = row[2];
+    var dev = data.devices.filter(function (d) { return d.id === id; })[0];
+    check(id + ' exists', !!dev, true);
+    check(id + ' is the energy monitor supply', /LWHEM-2/.test(dev.label), true);
+    check(id + ' is not in any shed list', (dev.shedIn || []).length, 0);
+    check('panel ' + panel + ' slot ' + slot + ' is not claimed empty',
+      (data.panels[panel].emptySlots || []).indexOf(slot), -1);
+  });
+
   /* --- the Panel B safety correction (v2.2) --- */
   /* Slots 2/4 were recorded as a 50A double oven and were therefore ON the
    * Panel B shed list. They are the generator inlet. If this regresses, the

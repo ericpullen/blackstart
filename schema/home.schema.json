@@ -394,7 +394,12 @@
                 ]
               },
               "smartReplacement": {
-                "type": "string"
+                "type": "string",
+                "description": "The smart part that WOULD drop into this slot. Present only while the slot still holds a dumb breaker; the retrofit replaces it with catalogNumber + replacedCatalogNumber."
+              },
+              "replacedCatalogNumber": {
+                "type": "string",
+                "description": "The part this one replaced, kept so a panel photo that predates a retrofit can still be reconciled against this file."
               },
               "photoVerified": {
                 "type": "boolean",
@@ -930,6 +935,41 @@
         "instrumentationPath": {
           "type": "string",
           "description": "What WOULD work, e.g. 'a CT pair on the feeder'."
+        },
+        "smartBreakerInstalled": {
+          "type": "boolean",
+          "description": "True once a metering breaker is actually in the slot, as opposed to merely being possible."
+        },
+        "meteredBy": {
+          "type": "object",
+          "description": "Where this device's measurements land. Display-only here: it is the join key the energycap pipeline uses to inherit this device's label, panel, slots and watts from this file, recorded so the two repos can be reconciled by hand.",
+          "properties": {
+            "system": {
+              "type": "string"
+            },
+            "hubId": {
+              "type": "string",
+              "description": "The energy monitor's own id, which is the pipeline's device_id for every channel in this panel."
+            },
+            "hubName": {
+              "type": "string"
+            },
+            "position": {
+              "type": "integer",
+              "description": "The breaker's physical slot. This, never the cloud's mutable breaker id, is the identity both sides join on."
+            },
+            "channelId": {
+              "type": "string",
+              "description": "breaker_p{position}. A 2-pole breaker is ONE channel, named for its lower slot, exactly as it is one device here."
+            },
+            "levitonLabel": {
+              "type": "string",
+              "description": "What the breaker calls itself in the Leviton app. Kept because a disagreement with `label` is worth seeing, not because it is authoritative - this file is."
+            },
+            "pipeline": {
+              "type": "string"
+            }
+          }
         }
       }
     },

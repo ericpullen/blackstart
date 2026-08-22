@@ -201,8 +201,8 @@ breaker with no circuits traced contributes 0 W. `loadSummary()` returns
 `untracedDevices` / `untracedAmps` and the meter says "Reads LOW: N breakers still
 on…" so the gap is visible. Only B-10-12 (the 40A heat pump outdoor unit) is
 still in that state — and it is the one thing the outage plan intends to *run*,
-so its figure matters. Panel A is now fully traced and its meter no longer
-carries the warning.
+so its figure matters — and as of 2026-08-22 it is metered, so a real number can
+replace it. Panel A remains fully traced and its meter carries no warning.
 
 `capacityKwh` (stored energy, how *long*) and `maxOutputWatts` (output ceiling,
 how *much at once*) are different things. The meter uses watts. There is no
@@ -279,13 +279,67 @@ app whose entire purpose is working without one.
 - Update `metadata.lastUpdated` in the data file — the home view shows it so a
   reader knows how fresh their offline copy is.
 
-## State of the data (as of 2026-08-10)
+## State of the data (as of 2026-08-22)
 
 Honest inventory, because the app's credibility depends on it:
 
+- **22 of the 32 devices are now Leviton 2nd-gen smart breakers** (18 of Panel
+  A's 22, 4 in Panel B), retrofitted 2026-08-22. Their `hardware.catalogNumber`
+  is the model string the breaker itself reports through the LWHEM-2 cloud, and
+  the part it replaced is kept in `replacedCatalogNumber`. Note the suffix is
+  **`-0ST`**, not the `-ST` this file used to predict. Those records carry no
+  `photoVerified` — deliberately: nobody has photographed the new bodies, but
+  the hardware's own report is not weaker evidence than a photo, so they must
+  not be badged unverified either. All 22 agreed with the amps and poles already
+  recorded here, which is the strongest cross-check this data has had.
+- **`monitoring.meteredBy` is the join to the energycap pipeline.** It names the
+  hub id, the physical position and the `channel_id` (`breaker_p{position}`) the
+  measurements land under. That pipeline inherits label, panel, slots and watts
+  from THIS file, so a label fixed here reaches every query; `levitonLabel`
+  records what the breaker calls itself in the Leviton app, which is worth
+  seeing when it disagrees but is never authoritative.
+- **B-10-12 is metered at last.** The 5-ton heat pump was the only device left
+  contributing 0 W to the load meter's "reads LOW" warning, and it is exactly
+  the thing the Panel B outage plan intends to run. A measured figure can
+  replace the 0 W after a few days of heating and cooling — not from one
+  sample, because a variable-speed unit at part capacity looks nothing like its
+  peak. B-26 likewise now measures the Anker charge rate that is a 1,000 W
+  placeholder.
+- **Each panel's energy monitor sits on its own 2-pole dumb breaker**, and both
+  are DO NOT SHED: A-27-29 for Panel A, B-17-19 (15 A, owner-confirmed) for
+  Panel B. The reason is not the obvious one — switching one off de-energises
+  nothing, because smart breakers are ordinary mechanical breakers, but it takes
+  out all metering, the app and remote control for that panel. It also means the
+  one load in the house that can never appear in the data is the metering system
+  itself: the monitor's supply comes through a dumb breaker. B-17-19 also
+  settles Panel B's slot count — 17/19 were recorded as verified empty from a
+  photo and are not.
+- **A-27-29 was NOT the Siemens SPD**, despite an earlier owner identification;
+  Leviton's own "Smart Home" label for it was right. Panel A's surge protection
+  is now a plug-on **Leviton LSPD1-T at 22/24**, and the external Siemens unit
+  is gone from Panel A. Panel B keeps its Siemens SPD at 28/30.
+- **The LSPD1-T is a COMBINATION device, and modelling it as a bare SPD is
+  wrong.** Leviton's spec: "two 15A single-pole standard thermal magnetic
+  circuit breakers" plus a Type 1 SPD (25 kA surge, 10 kA SCCR) in one plug-on
+  body. So A-22 and A-24 keep their identities, their ten circuits and their
+  ~770 W exactly as before — one body, but they switch and trip independently,
+  which is what the panel reader needs, so they stay two devices. Their
+  `hardware` records are identical and both say so; pulling the unit takes both
+  circuits and the surge protection at once.
+- **Switching those two breakers off does not disable surge protection.** The
+  spec is explicit that the SPD is fed line-side and "surge protection
+  continues, even if the breaker is off, or tripped" — a real improvement on the
+  external Siemens unit, which sat behind its own breaker. So they can be shed
+  like any other circuit.
+- **A-22 and A-24 are the only Panel A branch circuits that can never report
+  usage.** There is no smart variant of the LSPD1-T, so metering them means
+  giving up the panel's surge protection or finding it two more slots, and Panel
+  A has none free. Recorded in `monitoring` on both; the other 18 devices all
+  report.
 - **Panel A** is photo-verified for hardware and every breaker now has an
   identity. 19/21 is the water heater, 23/25 the mud-room mini-split (Pioneer
-  12k), 27/29 the Siemens SPD. The MWBCs at 5/7, 10/12 and 13/15 are **confirmed**
+  12k), 27/29 the energy monitor's supply (**not** the SPD — corrected
+  2026-08-22), 22/24 the Leviton LSPD1-T SPD. The MWBCs at 5/7, 10/12 and 13/15 are **confirmed**
   shared-neutral pairs, not 240V loads. What's left is that 5/7 and 10/12 each
   have a second leg (slots 5 and 12) with no endpoints recorded. No untraced
   capacity remains, so the Panel A meter no longer reads low.

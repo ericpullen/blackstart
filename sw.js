@@ -12,7 +12,7 @@
  *      atomically, so one bad path means the worker never installs and you
  *      lose ALL offline support. `npm run validate` checks this.
  */
-var CACHE = "blackstart-v4";
+var CACHE = "blackstart-v5";
 var ASSETS = [
   "./",
   "index.html",
